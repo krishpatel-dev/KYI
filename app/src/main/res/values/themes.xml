@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Material 3 app theme -->
+    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand colors -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryContainer">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
+
+        <!-- Needed so toolbar background draws into status‑bar area -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <!-- Circle overlay for ShapeableImageView -->
+    <style name="ShapeAppearance.Circle" parent="ShapeAppearance.Material3.Corner.Full">
+        <item name="cornerSize">50%</item>
+    </style>
+
+</resources>
