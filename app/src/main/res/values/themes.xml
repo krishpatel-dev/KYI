@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Material 3 app theme -->
-    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary brand colors -->
+    <!-- ─────────  MATERIAL‑3 APP THEME (NoActionBar) ───────── -->
+    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight">
+        <!-- Turn off the system ActionBar / Title -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Brand colours -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryContainer">@color/purple_700</item>
         <item name="android:statusBarColor">@color/purple_700</item>
 
-        <!-- Needed so toolbar background draws into status‑bar area -->
+        <!-- Draw status‑bar background so toolbar colour reaches notch -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 

@@ -52,7 +52,22 @@ dependencies {
     // Image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
+    // CameraX
+    val camerax = "1.3.1"
+    implementation("androidx.camera:camera-core:$camerax")
+    implementation("androidx.camera:camera-camera2:$camerax")
+    implementation("androidx.camera:camera-lifecycle:$camerax")
+    implementation("androidx.camera:camera-view:$camerax")
+
+    // Needed for await() support with ListenableFuture
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.8.1")
+
+    // Optional but okay to leave
+    implementation("com.google.guava:guava:32.1.3-jre")
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
