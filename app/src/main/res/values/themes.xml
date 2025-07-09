@@ -14,6 +14,7 @@
 
         <!-- Draw status‑bar background so toolbar colour reaches notch -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
     </style>
 
     <!-- Circle overlay for ShapeableImageView -->

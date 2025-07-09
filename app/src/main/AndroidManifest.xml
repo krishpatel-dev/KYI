@@ -2,13 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Runtime permissions for image selection -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <!-- For API 32 and lower -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <!-- Camera (optional if you later add TAKE_PICTURE) -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
 
     <application
         android:name=".KYIApp"
@@ -21,30 +19,41 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KnowYourIngredients">
 
+        <!-- Screens -->
+        <activity
+            android:name=".IngredientDetailActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".TextSelectionActivity"
+            android:exported="false"/>
         <activity
             android:name=".SettingsActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".EditProfileActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".SignupActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="false"/>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"/>
+
+        <!-- Splash/launcher -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-    </application>
 
+    </application>
 </manifest>

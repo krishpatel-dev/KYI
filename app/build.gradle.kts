@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    kotlin("kapt")
 }
 
 android {
@@ -69,5 +70,18 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    /* ML Kit on‑device text recognition */
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+
+    /* Room (pre‑loaded from CSV) */
+    val room = "2.6.1"
+    implementation("androidx.room:room-ktx:$room")
+    kapt("androidx.room:room-compiler:$room")
+
+    /* Coroutines for Room & MLKit background work */
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    implementation("com.opencsv:opencsv:5.9")
 }
 
