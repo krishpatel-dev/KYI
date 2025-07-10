@@ -11,6 +11,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.krishhh.knowyouringredients.databinding.ActivityTextSelectionBinding
+import com.krishhh.knowyouringredients.utils.HistoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -20,11 +21,7 @@ import kotlin.math.min
 class TextSelectionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTextSelectionBinding
-
-    /** All detected words in reading order */
     private val words = mutableListOf<Pair<Rect, String>>()
-
-    /** Indices of words currently selected */
     private val chosen = linkedSetOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,20 +34,17 @@ class TextSelectionActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         val path = intent.getStringExtra(EXTRA_PATH)!!
-        val bmp  = BitmapFactory.decodeFile(path)
+        val bmp = BitmapFactory.decodeFile(path)
         binding.photo.setImageBitmap(bmp)
 
-        /* Run OCR after ImageView is laid out */
         binding.photo.post { lifecycleScope.launch { detectWords(bmp) } }
 
-        /* ───── TAP HANDLER ───── */
         binding.overlay.setOnTouchListener { _, e ->
             if (e.action == MotionEvent.ACTION_DOWN) {
                 val idx = words.indexOfFirst { it.first.contains(e.x.toInt(), e.y.toInt()) }
                 if (idx != -1) {
-                    if (!chosen.add(idx)) chosen.remove(idx) // toggle
-                    binding.overlay.selectedBoxes =
-                        chosen.map { words[it].first }.toSet()
+                    if (!chosen.add(idx)) chosen.remove(idx)
+                    binding.overlay.selectedBoxes = chosen.map { words[it].first }.toSet()
                     binding.overlay.invalidate()
                     updateFabLabel()
                 }
@@ -58,15 +52,19 @@ class TextSelectionActivity : AppCompatActivity() {
             true
         }
 
-        /* ───── Go button ───── */
         binding.fabGo.setOnClickListener {
             val phrase = currentPhrase()
-            if (phrase.isEmpty()) toast("Tap words to build a phrase")
-            else startActivity(IngredientDetailActivity.intent(this, phrase))
+            if (phrase.isEmpty()) {
+                toast("Tap words to build a phrase")
+            } else {
+                // ✅ Save to history before opening details
+                HistoryManager.saveHistory(this, phrase)
+
+                startActivity(IngredientDetailActivity.intent(this, phrase))
+            }
         }
     }
 
-    /* ───────── OCR & mapping ───────── */
     private suspend fun detectWords(bmp: Bitmap) {
         val rec = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
         val result = rec.process(InputImage.fromBitmap(bmp, 0)).await()
@@ -76,18 +74,17 @@ class TextSelectionActivity : AppCompatActivity() {
         val iw = bmp.width.toFloat()
         val ih = bmp.height.toFloat()
 
-        val scale   = min(vw/iw, vh/ih)
-        val offX    = (vw - iw*scale)/2
-        val offY    = (vh - ih*scale)/2
+        val scale = min(vw / iw, vh / ih)
+        val offX = (vw - iw * scale) / 2
+        val offY = (vh - ih * scale) / 2
 
         fun map(r: Rect) = Rect(
-            (r.left*scale + offX).toInt(),
-            (r.top *scale + offY).toInt(),
-            (r.right*scale + offX).toInt(),
-            (r.bottom*scale+ offY).toInt()
+            (r.left * scale + offX).toInt(),
+            (r.top * scale + offY).toInt(),
+            (r.right * scale + offX).toInt(),
+            (r.bottom * scale + offY).toInt()
         )
 
-        // Collect words top‑to‑bottom, left‑to‑right
         result.textBlocks.forEach { b ->
             b.lines.forEach { l ->
                 l.elements.forEach { e ->
@@ -99,10 +96,8 @@ class TextSelectionActivity : AppCompatActivity() {
         binding.overlay.invalidate()
     }
 
-    /* ───────── helpers ───────── */
     private fun currentPhrase(): String =
-        chosen.map { words[it].second }
-            .joinToString(" ")
+        chosen.map { words[it].second }.joinToString(" ")
 
     private fun updateFabLabel() {
         binding.fabGo.contentDescription = currentPhrase()

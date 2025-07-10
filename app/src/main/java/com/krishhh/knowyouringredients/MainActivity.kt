@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.krishhh.knowyouringredients.databinding.ActivityMainBinding
+import com.krishhh.knowyouringredients.fragments.SearchFragment
 
 class MainActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener,
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var toggle: ActionBarDrawerToggle
+
+    private var currentSelectedItemId: Int = R.id.nav_camera
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity(),
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        /* Drawer */
+        // Drawer setup
         toggle = ActionBarDrawerToggle(
             this, binding.drawerLayout, binding.toolbar,
             R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -40,44 +43,56 @@ class MainActivity : AppCompatActivity(),
         toggle.syncState()
         binding.navView.setNavigationItemSelectedListener(this)
 
-        /* BottomNav */
+        // BottomNav setup
         binding.bottomNav.setOnNavigationItemSelectedListener(this)
-        binding.bottomNav.selectedItemId = R.id.nav_camera
+
+        // First time only — load camera fragment
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, CameraFragment())
+                .commit()
+            binding.bottomNav.selectedItemId = R.id.nav_camera
+        } else {
+            // Restore selected nav item from previous state
+            binding.bottomNav.selectedItemId = currentSelectedItemId
+        }
 
         loadProfile()
     }
 
-    /* ------ Single onNavigationItemSelected for BOTH components ------ */
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
 
-            /* Drawer items */
+            // Drawer actions
             R.id.nav_edit_profile -> startActivity(Intent(this, EditProfileActivity::class.java))
             R.id.nav_settings     -> startActivity(Intent(this, SettingsActivity::class.java))
-            R.id.nav_logout       -> {
-                FirebaseAuth.getInstance().signOut()
-                getSharedPreferences("user_prefs", MODE_PRIVATE)
-                    .edit().putBoolean("remember", false).apply()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finishAffinity(); return true
+            R.id.nav_logout -> {
+                showLogoutConfirmation()
             }
 
-            /* BottomNav items */
+
+            // BottomNav actions
             R.id.nav_search, R.id.nav_camera, R.id.nav_history -> {
-                val fragment = when (item.itemId) {
-                    R.id.nav_search  -> SearchFragment()
-                    R.id.nav_camera  -> CameraFragment()
-                    else             -> HistoryFragment()
+                if (item.itemId != currentSelectedItemId) {
+                    val fragment = when (item.itemId) {
+                        R.id.nav_search  -> SearchFragment()
+                        R.id.nav_camera  -> CameraFragment()
+                        else             -> HistoryFragment()
+                    }
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .commit()
+
+                    currentSelectedItemId = item.itemId
                 }
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, fragment)
-                    .commit()
             }
         }
-        // Close drawer if that was the source
+
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
 
     private fun loadProfile() {
         val header = binding.navView.getHeaderView(0)
@@ -98,12 +113,41 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onResume() {
-        super.onResume(); loadProfile()
+        super.onResume()
+        loadProfile()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("current_tab", currentSelectedItemId)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        currentSelectedItemId = savedInstanceState.getInt("current_tab", R.id.nav_camera)
     }
 
     override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
-        else finishAffinity()
+        } else {
+            finishAffinity()
+        }
     }
+
+    private fun showLogoutConfirmation() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("Yes") { _, _ ->
+                FirebaseAuth.getInstance().signOut()
+                getSharedPreferences("user_prefs", MODE_PRIVATE)
+                    .edit().putBoolean("remember", false).apply()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finishAffinity()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
 }

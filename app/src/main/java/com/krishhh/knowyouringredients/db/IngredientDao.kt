@@ -34,6 +34,9 @@ interface IngredientDao {
     """)
     suspend fun findContaining(word: String): IngredientEntity?
 
+    @Query("SELECT DISTINCT foodProduct FROM ingredients WHERE foodProduct LIKE :query || '%' LIMIT 10")
+    suspend fun searchSuggestions(query: String): List<String>
+
     /* Bulk CSV import */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun bulkInsert(list: List<IngredientEntity>)
