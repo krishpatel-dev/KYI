@@ -1,7 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.KnowYourIngredients" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+    <!-- ─────────  DARK THEME ───────── -->
+    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Disable default ActionBar -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Dark mode colors -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryContainer">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
+
+        <!-- Ensures toolbar color reaches notch -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
+
 </resources>

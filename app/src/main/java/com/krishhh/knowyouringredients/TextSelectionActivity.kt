@@ -5,12 +5,17 @@ import android.content.Intent
 import android.graphics.*
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.krishhh.knowyouringredients.databinding.ActivityTextSelectionBinding
+import com.krishhh.knowyouringredients.db.IngredientDatabase
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.krishhh.knowyouringredients.utils.HistoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,19 +28,37 @@ class TextSelectionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTextSelectionBinding
     private val words = mutableListOf<Pair<Rect, String>>()
     private val chosen = linkedSetOf<Int>()
+    private lateinit var adapter: SuggestionAdapter
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTextSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val bottomSheetLayout = findViewById<LinearLayout>(R.id.bottomSheetContainer)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.isHideable = true
+
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.title = "Scan Ingredients"  // Left-aligned by default
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         val path = intent.getStringExtra(EXTRA_PATH)!!
         val bmp = BitmapFactory.decodeFile(path)
         binding.photo.setImageBitmap(bmp)
+
+        adapter = SuggestionAdapter { selected ->
+            if (selected != "No such product") {
+                HistoryManager.saveHistory(this, selected)
+                startActivity(IngredientDetailActivity.intent(this, selected))
+            }
+        }
+        binding.rvSuggestions.layoutManager = LinearLayoutManager(this)
+        binding.rvSuggestions.adapter = adapter
 
         binding.photo.post { lifecycleScope.launch { detectWords(bmp) } }
 
@@ -46,22 +69,10 @@ class TextSelectionActivity : AppCompatActivity() {
                     if (!chosen.add(idx)) chosen.remove(idx)
                     binding.overlay.selectedBoxes = chosen.map { words[it].first }.toSet()
                     binding.overlay.invalidate()
-                    updateFabLabel()
+                    updateSuggestions()
                 }
             }
             true
-        }
-
-        binding.fabGo.setOnClickListener {
-            val phrase = currentPhrase()
-            if (phrase.isEmpty()) {
-                toast("Tap words to build a phrase")
-            } else {
-                // ✅ Save to history before opening details
-                HistoryManager.saveHistory(this, phrase)
-
-                startActivity(IngredientDetailActivity.intent(this, phrase))
-            }
         }
     }
 
@@ -96,15 +107,30 @@ class TextSelectionActivity : AppCompatActivity() {
         binding.overlay.invalidate()
     }
 
-    private fun currentPhrase(): String =
-        chosen.map { words[it].second }.joinToString(" ")
+    private fun updateSuggestions() {
+        val phrase = chosen.map { words[it].second }.joinToString(" ").trim()
+        if (phrase.isEmpty()) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            return
+        }
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        binding.tvSelectedText.text = phrase  // ✅ Show selected text beside label
 
-    private fun updateFabLabel() {
-        binding.fabGo.contentDescription = currentPhrase()
+        lifecycleScope.launch {
+            val results = withContext(Dispatchers.IO) {
+                val dao = IngredientDatabase.get(this@TextSelectionActivity).dao()
+                val keywords = phrase.split(" ").filter { it.isNotBlank() }
+
+                val allMatches = mutableSetOf<String>()
+                for (word in keywords) {
+                    allMatches += dao.searchSuggestions(word)
+                }
+
+                if (allMatches.isEmpty()) listOf("No such product") else allMatches.toList()
+            }
+            adapter.submitList(results)
+        }
     }
-
-    private fun toast(msg: String) =
-        android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
 
     companion object {
         private const val EXTRA_PATH = "path"

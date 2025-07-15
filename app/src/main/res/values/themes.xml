@@ -1,25 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ─────────  MATERIAL‑3 APP THEME (NoActionBar) ───────── -->
-    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight">
-        <!-- Turn off the system ActionBar / Title -->
+    <!-- ─────────  LIGHT THEME ───────── -->
+    <style name="Theme.KnowYourIngredients" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Disable default ActionBar -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <!-- Brand colours -->
+        <!-- Brand Colors -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryContainer">@color/purple_700</item>
         <item name="android:statusBarColor">@color/purple_700</item>
 
-        <!-- Draw status‑bar background so toolbar colour reaches notch -->
+        <!-- Ensures toolbar color reaches notch -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-
     </style>
 
     <!-- Circle overlay for ShapeableImageView -->
     <style name="ShapeAppearance.Circle" parent="ShapeAppearance.Material3.Corner.Full">
         <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Splash theme -->
+    <style name="Theme.KYI.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 
 </resources>

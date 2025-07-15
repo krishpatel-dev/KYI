@@ -34,10 +34,16 @@ interface IngredientDao {
     """)
     suspend fun findContaining(word: String): IngredientEntity?
 
-    @Query("SELECT DISTINCT foodProduct FROM ingredients WHERE foodProduct LIKE :query || '%' LIMIT 10")
+    /** Flexible suggestion match: case-insensitive and supports partial words */
+    @Query("""
+        SELECT DISTINCT foodProduct FROM ingredients
+        WHERE LOWER(foodProduct) LIKE '%' || LOWER(:query) || '%'
+           OR LOWER(mainIngredient) LIKE '%' || LOWER(:query) || '%'
+        LIMIT 10
+    """)
     suspend fun searchSuggestions(query: String): List<String>
 
-    /* Bulk CSV import */
+    /** Bulk CSV import */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun bulkInsert(list: List<IngredientEntity>)
 }

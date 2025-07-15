@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients.fragments
+package com.krishhh.knowyouringredients
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.krishhh.knowyouringredients.IngredientDetailActivity
 import com.krishhh.knowyouringredients.databinding.FragmentSearchBinding
 import com.krishhh.knowyouringredients.db.IngredientDatabase
 import com.krishhh.knowyouringredients.utils.HistoryManager

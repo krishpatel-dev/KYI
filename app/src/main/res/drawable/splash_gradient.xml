@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background base color (optional) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#000000"/> <!-- fallback black -->
+        </shape>
+    </item>
+
+    <!-- Top-left blob: Orange -->
+    <item android:left="-200dp" android:top="-200dp">
+        <shape android:shape="oval">
+            <size android:width="600dp" android:height="600dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:startColor="#FF9800"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Top-right blob: Red -->
+    <item android:right="-200dp" android:top="-200dp">
+        <shape android:shape="oval">
+            <size android:width="600dp" android:height="600dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:startColor="#F44336"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom-left blob: Blue -->
+    <item android:left="-200dp" android:bottom="-200dp">
+        <shape android:shape="oval">
+            <size android:width="600dp" android:height="600dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:startColor="#03A9F4"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom-right blob: Green -->
+    <item android:right="-200dp" android:bottom="-200dp">
+        <shape android:shape="oval">
+            <size android:width="600dp" android:height="600dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="300dp"
+                android:startColor="#8BC34A"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+</layer-list>

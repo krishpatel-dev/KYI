@@ -65,7 +65,7 @@ class LoginActivity : AppCompatActivity() {
 
         // -------- Click listeners ----------
         binding.btnLogin.setOnClickListener { doLogin() }
-        binding.btnGoogleSignIn.setOnClickListener { googleLauncher.launch(googleSignInClient.signInIntent) }
+        binding.btnGoogleSignInCustom.setOnClickListener { googleLauncher.launch(googleSignInClient.signInIntent) }
         binding.tvSignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }

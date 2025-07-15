@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Base background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#121212"/> <!-- dark base for better contrast -->
+        </shape>
+    </item>
+
+    <!-- Top-left blob: Soft Orange -->
+    <item android:left="-300dp" android:top="-300dp">
+        <shape android:shape="oval">
+            <size android:width="1000dp" android:height="1000dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="500dp"
+                android:startColor="#FFB74D"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Top-right blob: Soft Red -->
+    <item android:right="-300dp" android:top="-300dp">
+        <shape android:shape="oval">
+            <size android:width="1000dp" android:height="1000dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="500dp"
+                android:startColor="#E57373"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom-left blob: Soft Blue -->
+    <item android:left="-300dp" android:bottom="-300dp">
+        <shape android:shape="oval">
+            <size android:width="1000dp" android:height="1000dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="500dp"
+                android:startColor="#64B5F6"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom-right blob: Soft Green -->
+    <item android:right="-300dp" android:bottom="-300dp">
+        <shape android:shape="oval">
+            <size android:width="1000dp" android:height="1000dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="500dp"
+                android:startColor="#AED581"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+</layer-list>
