@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.*
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.*
 import com.krishhh.knowyouringredients.databinding.ActivityLoginBinding
 
@@ -65,13 +66,31 @@ class LoginActivity : AppCompatActivity() {
 
         // -------- Click listeners ----------
         binding.btnLogin.setOnClickListener { doLogin() }
-        binding.btnGoogleSignInCustom.setOnClickListener { googleLauncher.launch(googleSignInClient.signInIntent) }
+        binding.btnGoogleSignInCustom.setOnClickListener {
+            // Force sign out first to trigger account picker
+            googleSignInClient.signOut().addOnCompleteListener {
+                googleLauncher.launch(googleSignInClient.signInIntent)
+            }
+        }
         binding.tvSignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }
         binding.tvForgotPassword.setOnClickListener {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
+        binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s.isNullOrEmpty()) {
+                    binding.passwordLayout.endIconMode = TextInputLayout.END_ICON_NONE
+                } else {
+                    binding.passwordLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
     }
 
     // ========== Email / Password login ==========

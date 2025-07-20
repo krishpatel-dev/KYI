@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Toolbar -->
+        <!-- Fragment container -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="0dp"
@@ -20,11 +20,11 @@
             android:background="@color/purple_700"
             android:fitsSystemWindows="true"
             android:title="Know Your Ingredients"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Fragment container -->
         <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="0dp"
@@ -41,9 +41,9 @@
             android:layout_height="wrap_content"
             android:background="?android:attr/windowBackground"
             app:menu="@menu/bottom_nav_menu"
-            app:labelVisibilityMode="labeled"
-            app:itemIconTint="@color/purple_500"
-            app:itemTextColor="@color/purple_500"
+            app:labelVisibilityMode="selected"
+            app:itemIconTint="@color/purple_600"
+            app:itemTextColor="@color/purple_600"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -56,5 +56,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
+        app:itemIconTint="?attr/colorOnSurface"
+        app:itemTextColor="?attr/colorOnSurface"
         app:menu="@menu/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -9,10 +9,14 @@
         <!-- Brand Colors -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryContainer">@color/purple_700</item>
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar">true</item>
 
         <!-- Ensures toolbar color reaches notch -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <item name="bottomSheetBackground">@drawable/bg_bottomsheet_shape</item>
+
     </style>
 
     <!-- Circle overlay for ShapeableImageView -->

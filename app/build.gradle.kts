@@ -85,5 +85,7 @@ dependencies {
     implementation("com.opencsv:opencsv:5.9")
 
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 }
 

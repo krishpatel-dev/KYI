@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,36 +10,39 @@
         android:id="@+id/toolbarDetail"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/purple_700"
         android:titleTextColor="@android:color/white"
-        app:navigationIcon="@drawable/ic_arrow_back_24"/>
+        app:navigationIcon="@drawable/ic_arrow_back_24" />
 
     <!-- Scrollable content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:padding="20dp">
+        android:fadeScrollbars="true"
+        android:paddingHorizontal="20dp"
+        android:scrollbars="none">
 
         <LinearLayout
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
 
             <!-- Headline -->
             <TextView
                 android:id="@+id/tvFoodProduct"
                 style="@style/TextAppearance.Material3.HeadlineMedium"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textStyle="bold" />
 
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
 
             <!-- Main Ingredient card (unchanged) -->
             <com.google.android.material.card.MaterialCardView
@@ -52,31 +54,31 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="horizontal"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
-                        android:src="@drawable/ic_food_bank_24"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:tint="?attr/colorPrimary"/>
+                        android:src="@drawable/food_bank_60dp"
+                        android:tint="@color/purple_600" />
 
                     <TextView
-                        android:text="Main Ingredient"
                         style="@style/TextAppearance.Material3.BodyMedium"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
+                        android:text="Main Ingredient" />
 
                     <TextView
                         android:id="@+id/tvMainIngredient"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:textStyle="bold"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -90,31 +92,31 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="horizontal"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
-                        android:src="@drawable/ic_cookie_24"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:tint="?attr/colorPrimary"/>
+                        android:src="@drawable/cookie_60dp"
+                        android:tint="@color/purple_600" />
 
                     <TextView
-                        android:text="Sweetener"
                         style="@style/TextAppearance.Material3.BodyMedium"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
+                        android:text="Sweetener" />
 
                     <TextView
                         android:id="@+id/tvSweetener"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:textStyle="bold"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -128,31 +130,31 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="horizontal"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
-                        android:src="@drawable/ic_oil_barrel_24"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:tint="?attr/colorPrimary"/>
+                        android:src="@drawable/oil_barrel_60dp"
+                        android:tint="@color/purple_600" />
 
                     <TextView
-                        android:text="Fat / Oil"
                         style="@style/TextAppearance.Material3.BodyMedium"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
+                        android:text="Fat / Oil" />
 
                     <TextView
                         android:id="@+id/tvFatOil"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:textStyle="bold"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -166,36 +168,36 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <LinearLayout
-                        android:orientation="horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
                         <com.google.android.material.imageview.ShapeableImageView
-                            android:src="@drawable/ic_spa_24"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:tint="?attr/colorPrimary"/>
+                            android:src="@drawable/spa_60dp"
+                            android:tint="@color/purple_600" />
 
                         <TextView
-                            android:text="Seasoning"
                             style="@style/TextAppearance.Material3.BodyMedium"
-                            android:layout_marginStart="12dp"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Seasoning" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvSeasoning"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_marginTop="8dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -209,30 +211,30 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                        android:text="Allergens"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:textStyle="bold"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:text="Allergens"
+                        android:textStyle="bold" />
 
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:scrollbars="none">
 
                         <com.google.android.material.chip.ChipGroup
                             android:id="@+id/chipGroupAllergens"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:singleLine="true"
-                            app:chipSpacing="4dp"/>
+                            app:chipSpacing="4dp"
+                            app:singleLine="true" />
                     </HorizontalScrollView>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -247,36 +249,36 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <LinearLayout
-                        android:orientation="horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
                         <com.google.android.material.imageview.ShapeableImageView
-                            android:src="@drawable/ic_insights_24"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:tint="?attr/colorPrimary"/>
+                            android:src="@drawable/insights_60dp"
+                            android:tint="@color/purple_600" />
 
                         <TextView
-                            android:text="Prediction"
-                            android:layout_marginStart="12dp"
                             style="@style/TextAppearance.Material3.BodyMedium"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Prediction" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvPrediction"
                         style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_marginTop="8dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -284,11 +286,11 @@
             <TextView
                 android:id="@+id/tvNoData"
                 style="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?attr/colorError"
-                android:visibility="gone"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="?attr/colorError"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

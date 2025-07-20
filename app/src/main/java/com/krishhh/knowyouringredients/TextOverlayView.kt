@@ -32,4 +32,10 @@ class TextOverlayView @JvmOverloads constructor(
             postInvalidateOnAnimation()
         }
     }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
 }

@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.krishhh.knowyouringredients.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(),
@@ -21,9 +19,15 @@ class MainActivity : AppCompatActivity(),
     private lateinit var binding: ActivityMainBinding
     private lateinit var toggle: ActionBarDrawerToggle
 
+    private lateinit var viewModel: MainViewModel
+
+    private var isProfileLoaded = false
+
     private var currentSelectedItemId: Int = R.id.nav_camera
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        viewModel = androidx.lifecycle.ViewModelProvider(this)[MainViewModel::class.java]
+
         super.onCreate(savedInstanceState)
         if (FirebaseAuth.getInstance().currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java)); finish(); return
@@ -98,18 +102,15 @@ class MainActivity : AppCompatActivity(),
         val iv = header.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.ivProfile)
         val tv = header.findViewById<android.widget.TextView>(R.id.tvUsername)
 
-        Firebase.firestore.collection("users")
-            .document(FirebaseAuth.getInstance().currentUser!!.uid)
-            .get()
-            .addOnSuccessListener { snap ->
-                if (isDestroyed) return@addOnSuccessListener
-                tv.text = snap.getString("name") ?: "Hello!"
-                Glide.with(header.context)
-                    .load(snap.getString("photoUrl"))
-                    .placeholder(R.mipmap.ic_launcher_round)
-                    .into(iv)
-            }
+        viewModel.loadUserProfile { name, photo ->
+            tv.text = name ?: "Hello!"
+            Glide.with(header.context)
+                .load(photo)
+                .placeholder(R.mipmap.ic_launcher_round)
+                .into(iv)
+        }
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -147,6 +148,8 @@ class MainActivity : AppCompatActivity(),
             }
             .setNegativeButton("Cancel", null)
             .show()
+        isProfileLoaded = false
+
     }
 
 }

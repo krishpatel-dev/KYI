@@ -28,4 +28,18 @@
         <item name="android:layout_gravity">center</item>
     </style>
 
+    <attr name="bottomSheetBackground" format="reference" />
+
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowAnimationStyle">@style/ActivityTransition</item>
+    </style>
+
+    <style name="ActivityTransition">
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+
 </resources>

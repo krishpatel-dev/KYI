@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <!-- Search bar -->
     <EditText
         android:id="@+id/etSearch"
-        android:hint="Search for a product..."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_bar_background"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:drawablePadding="8dp"
-        android:padding="12dp"
-        android:background="@drawable/search_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:hint="Search for a product..."
+        android:textColor="@color/black"
+        android:padding="12dp" />
 
     <!-- Suggestion list -->
     <ListView

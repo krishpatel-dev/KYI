@@ -5,13 +5,13 @@
     android:id="@+id/rootSettings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">   <!-- 👈 offset for notch -->
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarSettings"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/purple_700"
         android:title="Settings"
         android:titleTextColor="@android:color/white"
         app:navigationIcon="@drawable/ic_arrow_back_24" />

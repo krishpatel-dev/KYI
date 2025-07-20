@@ -8,13 +8,16 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.krishhh.knowyouringredients.databinding.ActivityEditProfileBinding
+import kotlinx.coroutines.flow.collectLatest
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -23,6 +26,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditProfileBinding
     private var imageUri: Uri? = null
     private val uid by lazy { FirebaseAuth.getInstance().currentUser!!.uid }
+    private val viewModel: EditProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +37,8 @@ class EditProfileActivity : AppCompatActivity() {
         supportActionBar?.title = "Edit Profile"
         binding.toolbarEdit.setNavigationOnClickListener { finish() }
 
-        loadProfile()
+        observeProfile()
+        viewModel.loadProfileData()
 
         val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
@@ -50,16 +55,21 @@ class EditProfileActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener { saveProfile() }
     }
 
-    private fun loadProfile() {
-        Firebase.firestore.collection("users").document(uid)
-            .get()
-            .addOnSuccessListener { snap ->
-                binding.etName.setText(snap.getString("name") ?: "")
-                Glide.with(this)
-                    .load(snap.getString("photoUrl"))
+    private fun observeProfile() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.name.collectLatest { name ->
+                if (name != null) binding.etName.setText(name)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.photoUrl.collectLatest { url ->
+                Glide.with(this@EditProfileActivity)
+                    .load(url)
                     .placeholder(R.mipmap.ic_launcher_round)
                     .into(binding.ivEditPhoto)
             }
+        }
     }
 
     private fun saveProfile() {
@@ -84,7 +94,9 @@ class EditProfileActivity : AppCompatActivity() {
         ref.putBytes(baos.toByteArray())
             .continueWithTask { ref.downloadUrl }
             .addOnSuccessListener { url -> updateFirestore(name, url.toString()) }
-            .addOnFailureListener { Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show() }
+            .addOnFailureListener {
+                Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun updateFirestore(name: String, photoUrl: String?) {
@@ -94,6 +106,7 @@ class EditProfileActivity : AppCompatActivity() {
         Firebase.firestore.collection("users").document(uid)
             .set(data, com.google.firebase.firestore.SetOptions.merge())
             .addOnSuccessListener {
+                viewModel.updateLocalData(name, photoUrl)
                 Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show()
                 finish()
             }
