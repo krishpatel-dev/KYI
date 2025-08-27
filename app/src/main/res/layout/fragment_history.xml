@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:text="No history found."
         android:gravity="center"
+        android:layout_marginTop="250dp"
         android:textColor="?attr/colorOutline"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:visibility="gone"

@@ -1,6 +1,7 @@
 package com.krishhh.knowyouringredients.activities
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
@@ -53,6 +54,18 @@ class MainActivity : AppCompatActivity(),
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
+
+        // Theme-aware burger icon
+        val iconColor = if (resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        ) {
+            Color.WHITE // dark mode
+        } else {
+            Color.BLACK // light mode
+        }
+        toggle.drawerArrowDrawable.color = iconColor
+
         binding.navView.setNavigationItemSelectedListener(this)
         binding.bottomNav.setOnNavigationItemSelectedListener(this)
 

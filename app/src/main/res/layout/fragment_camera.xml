@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cameraRoot"
     android:layout_width="match_parent"
@@ -8,22 +7,54 @@
     <!-- Camera preview -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Floating Scan button styled as Snapchat shutter -->
+    <!-- Shutter button (center) -->
     <ImageButton
         android:id="@+id/fabScan"
         android:layout_width="84dp"
         android:layout_height="84dp"
-        android:layout_gravity="bottom|center"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="55dp"
         android:background="@drawable/shutter_ripple"
-        android:padding="0dp"
         android:clickable="true"
         android:focusable="true"
-        android:elevation="6dp"/>
+        android:elevation="6dp"
+        android:padding="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="55dp" />
 
-</FrameLayout>
+    <!-- Gallery button (left of shutter, vertically centered) -->
+    <ImageButton
+        android:id="@+id/fabGallery"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/photo_library_30dp"
+        android:contentDescription="Gallery"
+        android:elevation="6dp"
+        app:layout_constraintTop_toTopOf="@id/fabScan"
+        app:layout_constraintBottom_toBottomOf="@id/fabScan"
+        app:layout_constraintEnd_toStartOf="@id/fabScan"
+        android:layout_marginEnd="20dp" />
+
+    <!-- Flash button (right of shutter, vertically centered) -->
+    <ImageButton
+        android:id="@+id/fabFlash"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/flash_off_30dp"
+        android:contentDescription="Flash"
+        android:elevation="6dp"
+        app:layout_constraintTop_toTopOf="@id/fabScan"
+        app:layout_constraintBottom_toBottomOf="@id/fabScan"
+        app:layout_constraintStart_toEndOf="@id/fabScan"
+        android:layout_marginStart="20dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
