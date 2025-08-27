@@ -9,5 +9,7 @@
     <color name="purple_700">#FF8131</color>
     <color name="teal_200">#03DAC5</color>
     <color name="box_stroke_color">#4CAF50</color>
+    <color name="my_custom_red">#BFFB0000</color>
+
 
 </resources>

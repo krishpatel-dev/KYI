@@ -44,7 +44,6 @@
                 android:layout_height="1dp"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Main Ingredient card (unchanged) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,30 +56,40 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
+                    <!-- Left icon -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/food_bank_60dp"
                         android:tint="@color/purple_600" />
 
-                    <TextView
-                        style="@style/TextAppearance.Material3.BodyMedium"
+                    <!-- Text container -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Main Ingredient" />
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvMainIngredient"
-                        style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold" />
+                        <TextView
+                            style="@style/TextAppearance.Material3.BodyMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Main Ingredient"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvMainIngredient"
+                            style="@style/TextAppearance.Material3.BodyMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Sweetener card (unchanged) -->
             <com.google.android.material.card.MaterialCardView
@@ -109,14 +118,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Sweetener" />
+                        android:text="Sweetener"
+                        android:textStyle="bold"/>
 
                     <TextView
                         android:id="@+id/tvSweetener"
                         style="@style/TextAppearance.Material3.BodyMedium"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold" />
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -147,14 +156,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Fat / Oil" />
+                        android:text="Fat / Oil"
+                        android:textStyle="bold"/>
 
                     <TextView
                         android:id="@+id/tvFatOil"
                         style="@style/TextAppearance.Material3.BodyMedium"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold" />
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -168,7 +177,7 @@
                 app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
@@ -189,7 +198,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:text="Seasoning" />
+                            android:text="Seasoning"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <TextView
@@ -201,7 +211,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Allergens card with horizontal scroll -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -216,13 +225,29 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_width="wrap_content"
+                    <!-- Header row (icon + title) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Allergens"
-                        android:textStyle="bold" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/allergy_60dp"
+                            android:tint="@color/purple_600" />
+
+                        <TextView
+                            style="@style/TextAppearance.Material3.BodyMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Allergens"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Horizontal chips -->
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -238,6 +263,7 @@
                     </HorizontalScrollView>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
 
             <!-- Prediction card (stacked layout) -->
             <com.google.android.material.card.MaterialCardView
@@ -270,7 +296,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:text="Prediction" />
+                            android:text="Prediction"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <TextView

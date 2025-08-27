@@ -1,18 +1,22 @@
 package com.krishhh.knowyouringredients
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainViewModel : ViewModel() {
-    var userName: String? = null
     var photoUrl: String? = null
     var hasLoadedProfile = false
 
+    val localPhotoUri = MutableStateFlow<Uri?>(null) // For immediate image
+    val localUserName = MutableStateFlow<String?>(null) // NEW: For immediate name update
+
     fun loadUserProfile(onLoaded: (String?, String?) -> Unit) {
         if (hasLoadedProfile) {
-            onLoaded(userName, photoUrl)
+            onLoaded(localUserName.value ?: "", photoUrl)
             return
         }
 
@@ -20,10 +24,10 @@ class MainViewModel : ViewModel() {
             .document(FirebaseAuth.getInstance().currentUser!!.uid)
             .get()
             .addOnSuccessListener { snap ->
-                userName = snap.getString("name")
+                localUserName.value = snap.getString("name")
                 photoUrl = snap.getString("photoUrl")
                 hasLoadedProfile = true
-                onLoaded(userName, photoUrl)
+                onLoaded(localUserName.value, photoUrl)
             }
     }
 }

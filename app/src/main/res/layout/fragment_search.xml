@@ -15,6 +15,7 @@
         android:drawablePadding="8dp"
         android:hint="Search for a product..."
         android:textColor="@color/black"
+        android:textColorHint="#A6A4A4"
         android:padding="12dp" />
 
     <!-- Suggestion list -->

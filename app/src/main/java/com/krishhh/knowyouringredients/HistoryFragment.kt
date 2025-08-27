@@ -1,7 +1,9 @@
 package com.krishhh.knowyouringredients
 
+import android.graphics.*
 import android.os.Bundle
 import android.view.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
@@ -67,14 +69,100 @@ class HistoryFragment : Fragment() {
                 }
             }
 
-            override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-                return super.getSwipeDirs(recyclerView, viewHolder)
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                val itemView = viewHolder.itemView
+                val background = Paint().apply {
+                    color = ContextCompat.getColor(recyclerView.context, R.color.my_custom_red)
+                    style = Paint.Style.FILL
+                    isAntiAlias = true
+                }
+                val cornerRadius = 24f
+
+                // Draw different rects depending on swipe direction
+                if (dX > 0) {
+                    // Swiping Right → Left edge rounded, Right edge flat
+                    val rectF = RectF(
+                        itemView.left.toFloat(),
+                        itemView.top.toFloat(),
+                        itemView.left + dX,
+                        itemView.bottom.toFloat()
+                    )
+                    val radii = floatArrayOf(
+                        cornerRadius, cornerRadius,  // top-left
+                        0f, 0f,                      // top-right flat
+                        0f, 0f,                      // bottom-right flat
+                        cornerRadius, cornerRadius   // bottom-left
+                    )
+                    val path = Path().apply {
+                        addRoundRect(rectF, radii, Path.Direction.CW)
+                    }
+                    c.drawPath(path, background)
+
+                    // 🗑️ Trash icon (closer to edge)
+                    val icon = ContextCompat.getDrawable(
+                        recyclerView.context,
+                        R.drawable.delete_30dp
+                    )!!
+                    val iconMargin = (itemView.height - icon.intrinsicHeight) / 3  // reduced padding
+                    val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
+                    val iconBottom = iconTop + icon.intrinsicHeight
+                    val iconLeft = itemView.left + iconMargin
+                    val iconRight = iconLeft + icon.intrinsicWidth
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                    icon.draw(c)
+
+                } else if (dX < 0) {
+                    // Swiping Left → Right edge rounded, Left edge flat
+                    val rectF = RectF(
+                        itemView.right + dX,
+                        itemView.top.toFloat(),
+                        itemView.right.toFloat(),
+                        itemView.bottom.toFloat()
+                    )
+                    val radii = floatArrayOf(
+                        0f, 0f,                      // top-left flat
+                        cornerRadius, cornerRadius,  // top-right
+                        cornerRadius, cornerRadius,  // bottom-right
+                        0f, 0f                       // bottom-left flat
+                    )
+                    val path = Path().apply {
+                        addRoundRect(rectF, radii, Path.Direction.CW)
+                    }
+                    c.drawPath(path, background)
+
+                    // 🗑️ Trash icon (closer to edge)
+                    val icon = ContextCompat.getDrawable(
+                        recyclerView.context,
+                        R.drawable.delete_30dp
+                    )!!
+                    val iconMargin = (itemView.height - icon.intrinsicHeight) / 3  // reduced padding
+                    val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
+                    val iconBottom = iconTop + icon.intrinsicHeight
+                    val iconRight = itemView.right - iconMargin
+                    val iconLeft = iconRight - icon.intrinsicWidth
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                    icon.draw(c)
+                }
+
+                // Continue swipe animation
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
+
+
         }
 
         val itemTouchHelper = ItemTouchHelper(swipeHandler)
         itemTouchHelper.attachToRecyclerView(binding.rvHistory)
     }
+
 
     private fun showUndoSnackbar() {
         val snackbar = Snackbar.make(binding.root, "Item deleted", Snackbar.LENGTH_LONG)

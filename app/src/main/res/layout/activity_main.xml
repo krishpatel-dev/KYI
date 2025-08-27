@@ -19,7 +19,6 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/purple_700"
             android:fitsSystemWindows="true"
-            android:title="Know Your Ingredients"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"

@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -13,13 +15,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.krishhh.knowyouringredients.databinding.ActivityEditProfileBinding
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.*
+import androidx.core.content.edit
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -28,22 +34,46 @@ class EditProfileActivity : AppCompatActivity() {
     private val uid by lazy { FirebaseAuth.getInstance().currentUser!!.uid }
     private val viewModel: EditProfileViewModel by viewModels()
 
+    private val dietOptions = listOf("None", "Vegetarian", "Vegan", "Pescatarian", "Keto", "Halal", "Jain", "Other")
+    private val genderOptions = listOf("Prefer not to say", "Male", "Female", "Other")
+    private val goalsOptions = listOf("Maintain weight", "Lose weight", "Gain muscle", "Improve heart health", "General wellness")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEditProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Toolbar
         setSupportActionBar(binding.toolbarEdit)
         supportActionBar?.title = "Edit Profile"
         binding.toolbarEdit.setNavigationOnClickListener { finish() }
 
+        // Setup dropdowns
+        (binding.actvDietType as AutoCompleteTextView).setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, dietOptions)
+        )
+        (binding.actvGender as AutoCompleteTextView).setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, genderOptions)
+        )
+        (binding.actvGoals as AutoCompleteTextView).setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, goalsOptions)
+        )
+
         observeProfile()
         viewModel.loadProfileData()
 
+        // Image picker
         val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                imageUri = it.data?.data
-                binding.ivEditPhoto.setImageURI(imageUri)
+                it.data?.data?.let { uri ->
+                    imageUri = uri
+
+                    // Load into EditProfileActivity ImageView
+                    Glide.with(this).load(uri).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
+
+                    // Update MainActivity immediately via shared ViewModel
+                    MainActivity.instance?.viewModel?.localPhotoUri?.value = uri
+                }
             }
         }
 
@@ -52,66 +82,118 @@ class EditProfileActivity : AppCompatActivity() {
             picker.launch(intent)
         }
 
-        binding.btnSave.setOnClickListener { saveProfile() }
+        // binding.btnSave.setOnClickListener { saveProfile() }
+
+        // When user selects a new photo or updates the name
+        binding.btnSave.setOnClickListener {
+            val newName = binding.etName.text.toString().trim()
+            val newPhotoUri = imageUri
+            // Update sidebar immediately
+            MainActivity.instance?.viewModel?.localUserName?.value = newName
+            if (newPhotoUri != null) {
+                MainActivity.instance?.viewModel?.localPhotoUri?.value = newPhotoUri
+            }
+            saveProfile()
+        }
+
     }
 
     private fun observeProfile() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.name.collectLatest { name ->
-                if (name != null) binding.etName.setText(name)
-            }
-        }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.photoUrl.collectLatest { url ->
-                Glide.with(this@EditProfileActivity)
-                    .load(url)
-                    .placeholder(R.mipmap.ic_launcher_round)
-                    .into(binding.ivEditPhoto)
-            }
-        }
+        lifecycleScope.launch { viewModel.name.collectLatest { it?.let { binding.etName.setText(it) } } }
+        lifecycleScope.launch { viewModel.photoUrl.collectLatest { url ->
+            Glide.with(this@EditProfileActivity).load(url).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
+        } }
+        lifecycleScope.launch { viewModel.email.collectLatest { it?.let { binding.etEmail.setText(it) } } }
+        lifecycleScope.launch { viewModel.age.collectLatest { it?.let { binding.etAge.setText(it.toString()) } } }
+        lifecycleScope.launch { viewModel.gender.collectLatest { it?.let { binding.actvGender.setText(it, false) } } }
+        lifecycleScope.launch { viewModel.weight.collectLatest { it?.let { binding.etWeight.setText(it.toString()) } } }
+        lifecycleScope.launch { viewModel.height.collectLatest { it?.let { binding.etHeight.setText(it.toString()) } } }
+        lifecycleScope.launch { viewModel.dietType.collectLatest { it?.let { binding.actvDietType.setText(it, false) } } }
+        lifecycleScope.launch { viewModel.allergies.collectLatest { it?.let { binding.etAllergies.setText(it) } } }
+        lifecycleScope.launch { viewModel.healthConditions.collectLatest { it?.let { binding.etHealth.setText(it) } } }
+        lifecycleScope.launch { viewModel.preferences.collectLatest { it?.let { binding.etPreferences.setText(it) } } }
+        lifecycleScope.launch { viewModel.goals.collectLatest { it?.let { binding.actvGoals.setText(it, false) } } }
     }
 
     private fun saveProfile() {
         val name = binding.etName.text.toString().trim()
-        if (name.isEmpty()) {
-            Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val email = binding.etEmail.text.toString().trim()
+        if (name.isEmpty()) { Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show(); return }
+        if (email.isEmpty()) { Toast.makeText(this, "Email cannot be empty", Toast.LENGTH_SHORT).show(); return }
 
-        if (imageUri != null) uploadImageThenSave(name) else updateFirestore(name, null)
+        val age = binding.etAge.text.toString().trim().toIntOrNull()
+        val weight = binding.etWeight.text.toString().trim().toFloatOrNull()
+        val height = binding.etHeight.text.toString().trim().toFloatOrNull()
+        val gender = binding.actvGender.text.toString().takeIf { it.isNotBlank() }
+        val diet = binding.actvDietType.text.toString().takeIf { it.isNotBlank() }
+        val allergies = binding.etAllergies.text.toString().trim().takeIf { it.isNotBlank() }
+        val health = binding.etHealth.text.toString().trim().takeIf { it.isNotBlank() }
+        val preferences = binding.etPreferences.text.toString().trim().takeIf { it.isNotBlank() }
+        val goals = binding.actvGoals.text.toString().takeIf { it.isNotBlank() }
+
+        val currentPhoto = viewModel.photoUrl.value
+
+        if (imageUri != null) {
+            uploadImageThenSave(name, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
+        } else {
+//            updateFirestore(name, currentPhoto, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
+            val currentPhotoUrl = viewModel.photoUrl.value
+            updateFirestore(name, currentPhotoUrl, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
+        }
     }
 
-    private fun uploadImageThenSave(name: String) {
-        val ref = FirebaseStorage.getInstance().reference
-            .child("profile_images/${uid}_${UUID.randomUUID()}.jpg")
-
+    private fun uploadImageThenSave(
+        name: String, email: String, age: Int?, gender: String?, weight: Float?, height: Float?,
+        diet: String?, allergies: String?, health: String?, preferences: String?, goals: String?
+    ) {
+        val ref = FirebaseStorage.getInstance().reference.child("profile_images/${uid}_${UUID.randomUUID()}.jpg")
         val bmp = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
-        val baos = ByteArrayOutputStream().apply {
-            bmp.compress(Bitmap.CompressFormat.JPEG, 80, this)
-        }
+        val baos = ByteArrayOutputStream().apply { bmp.compress(Bitmap.CompressFormat.JPEG, 80, this) }
 
         ref.putBytes(baos.toByteArray())
             .continueWithTask { ref.downloadUrl }
-            .addOnSuccessListener { url -> updateFirestore(name, url.toString()) }
-            .addOnFailureListener {
-                Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show()
+            .addOnSuccessListener { url ->
+                updateFirestore(name, url.toString(), email, age, gender, weight, height, diet, allergies, health, preferences, goals)
             }
+            .addOnFailureListener { Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show() }
     }
 
-    private fun updateFirestore(name: String, photoUrl: String?) {
-        val data = hashMapOf<String, Any>("name" to name)
-        photoUrl?.let { data["photoUrl"] = it }
+    private fun updateFirestore(
+        name: String, photoUrl: String?, email: String, age: Int?, gender: String?, weight: Float?, height: Float?,
+        dietType: String?, allergies: String?, healthConditions: String?, preferences: String?, goals: String?
+    ) {
+        val data = hashMapOf<String, Any>(
+            "name" to name,
+            "email" to email,
+            "photoUrl" to (photoUrl ?: "")
+        )
+
+        // Optional fields
+        data["age"] = age ?: FieldValue.delete()
+        data["gender"] = gender?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
+        data["weight"] = weight ?: FieldValue.delete()
+        data["height"] = height ?: FieldValue.delete()
+        data["dietType"] = dietType?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
+        data["allergies"] = allergies?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
+        data["healthConditions"] = healthConditions?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
+        data["preferences"] = preferences?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
+        data["healthGoals"] = goals?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
 
         Firebase.firestore.collection("users").document(uid)
-            .set(data, com.google.firebase.firestore.SetOptions.merge())
+            .set(data, SetOptions.merge())
             .addOnSuccessListener {
-                viewModel.updateLocalData(name, photoUrl)
-                Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+
+                // 🔹 Save to SharedPreferences for persistence
+                getSharedPreferences("user_prefs", MODE_PRIVATE).edit {
+                    putString("photoUrl", photoUrl)  // only if a new photo uploaded
+                        .putString("userName", name)
+                }
+
+                // Refresh MainActivity sidebar immediately
+                MainActivity.instance?.loadProfile()
                 finish()
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show()
-            }
+            .addOnFailureListener { Toast.makeText(this, "Failed to update profile", Toast.LENGTH_SHORT).show() }
     }
 }
