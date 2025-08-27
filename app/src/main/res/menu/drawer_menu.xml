@@ -3,18 +3,34 @@
 
     <item
         android:id="@+id/nav_edit_profile"
-        android:title="Edit Profile"
-        android:icon="@drawable/edit_30dp" />
-
+        android:icon="@drawable/edit_30dp"
+        android:title="Edit Profile" />
     <item
         android:id="@+id/nav_settings"
-        android:title="Settings"
         android:icon="@drawable/settings_30dp"
-        android:orderInCategory="100" />
+        android:title="Settings" />
+
+    <!-- New Items -->
+    <item
+        android:id="@+id/nav_tips"
+        android:icon="@drawable/recommend_30dp"
+        android:title="Nutrition Tips" />
+    <item
+        android:id="@+id/nav_help"
+        android:icon="@drawable/help_30dp"
+        android:title="Help / FAQ" />
+    <item
+        android:id="@+id/nav_feedback"
+        android:icon="@drawable/feedback_30dp"
+        android:title="Feedback" />
+    <item
+        android:id="@+id/nav_about"
+        android:icon="@drawable/info_30dp"
+        android:title="About" />
 
     <item
         android:id="@+id/nav_logout"
-        android:title="Logout"
         android:icon="@drawable/ic_logout"
-        android:orderInCategory="200"/>
+        android:title="Logout" />
 </menu>
+

@@ -1,26 +1,27 @@
 package com.krishhh.knowyouringredients
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.auth.api.signin.*
-import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.krishhh.knowyouringredients.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
-    private lateinit var prefs: SharedPreferences
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    // Google‑sign‑in launcher
     private val googleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -30,14 +31,26 @@ class LoginActivity : AppCompatActivity() {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { task2 ->
                         if (task2.isSuccessful) {
-                            rememberUser()      // <- save flag
-                            gotoMain()
+                            val uid = auth.currentUser!!.uid
+                            val db = Firebase.firestore
+                            val userRef = db.collection("users").document(uid)
+                            userRef.get().addOnSuccessListener { snapshot ->
+                                if (!snapshot.exists()) {
+                                    // Create initial user record
+                                    val data = hashMapOf(
+                                        "name" to (auth.currentUser?.displayName ?: "User"),
+                                        "email" to auth.currentUser?.email!!
+                                    )
+                                    userRef.set(data)
+                                }
+                                gotoMain()
+                            }
                         } else {
                             Toast.makeText(this, "Google login failed", Toast.LENGTH_SHORT).show()
                         }
                     }
             } catch (e: Exception) {
-                Toast.makeText(this, "Google sign‑in failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Google sign-in failed", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -46,28 +59,20 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        auth  = FirebaseAuth.getInstance()
-        prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        auth = FirebaseAuth.getInstance()
 
-        // -------- Google sign‑in client ----------
+        // Google sign-in setup
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // -------- Auto‑login if remembered ----------
-        val current = auth.currentUser
-        if (current != null && prefs.getBoolean("remember", false)) {
-            val verified = current.isEmailVerified ||
-                    current.providerData.any { it.providerId == "google.com" }
-            if (verified) gotoMain()
-        }
+        // If user is already logged in, skip login
+        auth.currentUser?.let { gotoMain() }
 
-        // -------- Click listeners ----------
         binding.btnLogin.setOnClickListener { doLogin() }
         binding.btnGoogleSignInCustom.setOnClickListener {
-            // Force sign out first to trigger account picker
             googleSignInClient.signOut().addOnCompleteListener {
                 googleLauncher.launch(googleSignInClient.signInIntent)
             }
@@ -78,31 +83,19 @@ class LoginActivity : AppCompatActivity() {
         binding.tvForgotPassword.setOnClickListener {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
-        binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
-            override fun afterTextChanged(s: android.text.Editable?) {
-                if (s.isNullOrEmpty()) {
-                    binding.passwordLayout.endIconMode = TextInputLayout.END_ICON_NONE
-                } else {
-                    binding.passwordLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
     }
 
-    // ========== Email / Password login ==========
     private fun doLogin() {
         val email = binding.etEmail.text.toString().trim()
-        val pass  = binding.etPassword.text.toString().trim()
+        val pass = binding.etPassword.text.toString().trim()
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.error = "Invalid email"; return
+            binding.etEmail.error = "Invalid email"
+            return
         }
         if (pass.length < 6) {
-            binding.etPassword.error = "Min 6 chars"; return
+            binding.etPassword.error = "Min 6 chars"
+            return
         }
 
         toggleLoading(true)
@@ -111,7 +104,6 @@ class LoginActivity : AppCompatActivity() {
                 toggleLoading(false)
                 if (it.isSuccessful) {
                     if (auth.currentUser!!.isEmailVerified) {
-                        rememberUser()               // <- save flag
                         gotoMain()
                     } else {
                         Toast.makeText(this, "Verify your email first!", Toast.LENGTH_LONG).show()
@@ -122,10 +114,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
     }
-
-    // ========== Helpers ==========
-    private fun rememberUser() =
-        prefs.edit().putBoolean("remember", true).apply()   // always remember on success
 
     private fun toggleLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE

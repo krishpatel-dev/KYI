@@ -18,8 +18,6 @@ class HistoryFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: HistoryAdapter
-    private val historyList = mutableListOf<HistoryEntry>()
-
     private var recentlyDeletedItem: HistoryEntry? = null
     private var recentlyDeletedPosition: Int = -1
 
@@ -32,22 +30,30 @@ class HistoryFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = HistoryAdapter(historyList) {
+        adapter = HistoryAdapter(HistoryManager.getHistory(requireContext())) {
             startActivity(IngredientDetailActivity.intent(requireContext(), it.phrase))
         }
 
         binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.rvHistory.adapter = adapter
 
-        loadHistory()
+        updateNoHistoryView()
         setupSwipeToDelete()
     }
 
-    private fun loadHistory() {
-        historyList.clear()
-        historyList.addAll(HistoryManager.getHistory(requireContext()))
-        adapter.notifyDataSetChanged()
-        binding.tvNoHistory.visibility = if (historyList.isEmpty()) View.VISIBLE else View.GONE
+    override fun onResume() {
+        super.onResume()
+        reloadHistory()
+    }
+
+    private fun reloadHistory() {
+        val newList = HistoryManager.getHistory(requireContext())
+        adapter.setItems(newList)
+        updateNoHistoryView()
+    }
+
+    private fun updateNoHistoryView() {
+        binding.tvNoHistory.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
     }
 
     private fun setupSwipeToDelete() {
@@ -63,10 +69,7 @@ class HistoryFragment : Fragment() {
 
                 adapter.removeAt(recentlyDeletedPosition)
                 showUndoSnackbar()
-
-                if (adapter.itemCount == 0) {
-                    binding.tvNoHistory.visibility = View.VISIBLE
-                }
+                updateNoHistoryView()
             }
 
             override fun onChildDraw(
@@ -86,114 +89,56 @@ class HistoryFragment : Fragment() {
                 }
                 val cornerRadius = 24f
 
-                // Draw different rects depending on swipe direction
+                val rectF: RectF
+                val radii: FloatArray
+                val icon = ContextCompat.getDrawable(recyclerView.context, R.drawable.delete_30dp)!!
+                val iconMargin = (itemView.height - icon.intrinsicHeight) / 3
+                val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
+                val iconBottom = iconTop + icon.intrinsicHeight
+
                 if (dX > 0) {
-                    // Swiping Right → Left edge rounded, Right edge flat
-                    val rectF = RectF(
-                        itemView.left.toFloat(),
-                        itemView.top.toFloat(),
-                        itemView.left + dX,
-                        itemView.bottom.toFloat()
-                    )
-                    val radii = floatArrayOf(
-                        cornerRadius, cornerRadius,  // top-left
-                        0f, 0f,                      // top-right flat
-                        0f, 0f,                      // bottom-right flat
-                        cornerRadius, cornerRadius   // bottom-left
-                    )
-                    val path = Path().apply {
-                        addRoundRect(rectF, radii, Path.Direction.CW)
-                    }
-                    c.drawPath(path, background)
-
-                    // 🗑️ Trash icon (closer to edge)
-                    val icon = ContextCompat.getDrawable(
-                        recyclerView.context,
-                        R.drawable.delete_30dp
-                    )!!
-                    val iconMargin = (itemView.height - icon.intrinsicHeight) / 3  // reduced padding
-                    val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
-                    val iconBottom = iconTop + icon.intrinsicHeight
-                    val iconLeft = itemView.left + iconMargin
-                    val iconRight = iconLeft + icon.intrinsicWidth
-                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
-                    icon.draw(c)
-
-                } else if (dX < 0) {
-                    // Swiping Left → Right edge rounded, Left edge flat
-                    val rectF = RectF(
-                        itemView.right + dX,
-                        itemView.top.toFloat(),
-                        itemView.right.toFloat(),
-                        itemView.bottom.toFloat()
-                    )
-                    val radii = floatArrayOf(
-                        0f, 0f,                      // top-left flat
-                        cornerRadius, cornerRadius,  // top-right
-                        cornerRadius, cornerRadius,  // bottom-right
-                        0f, 0f                       // bottom-left flat
-                    )
-                    val path = Path().apply {
-                        addRoundRect(rectF, radii, Path.Direction.CW)
-                    }
-                    c.drawPath(path, background)
-
-                    // 🗑️ Trash icon (closer to edge)
-                    val icon = ContextCompat.getDrawable(
-                        recyclerView.context,
-                        R.drawable.delete_30dp
-                    )!!
-                    val iconMargin = (itemView.height - icon.intrinsicHeight) / 3  // reduced padding
-                    val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
-                    val iconBottom = iconTop + icon.intrinsicHeight
-                    val iconRight = itemView.right - iconMargin
-                    val iconLeft = iconRight - icon.intrinsicWidth
-                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
-                    icon.draw(c)
+                    rectF = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + dX, itemView.bottom.toFloat())
+                    radii = floatArrayOf(cornerRadius, cornerRadius, 0f, 0f, 0f, 0f, cornerRadius, cornerRadius)
+                    icon.setBounds(itemView.left + iconMargin, iconTop, itemView.left + iconMargin + icon.intrinsicWidth, iconBottom)
+                } else {
+                    rectF = RectF(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
+                    radii = floatArrayOf(0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius, 0f, 0f)
+                    icon.setBounds(itemView.right - iconMargin - icon.intrinsicWidth, iconTop, itemView.right - iconMargin, iconBottom)
                 }
 
-                // Continue swipe animation
+                val path = Path().apply { addRoundRect(rectF, radii, Path.Direction.CW) }
+                c.drawPath(path, background)
+                icon.draw(c)
+
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
-
-
         }
 
-        val itemTouchHelper = ItemTouchHelper(swipeHandler)
-        itemTouchHelper.attachToRecyclerView(binding.rvHistory)
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.rvHistory)
     }
-
 
     private fun showUndoSnackbar() {
         val snackbar = Snackbar.make(binding.root, "Item deleted", Snackbar.LENGTH_LONG)
             .setAction("UNDO") {
                 recentlyDeletedItem?.let {
-                    historyList.add(recentlyDeletedPosition, it)
-                    adapter.notifyItemInserted(recentlyDeletedPosition)
-                    binding.tvNoHistory.visibility = View.GONE
+                    adapter.setItems(
+                        HistoryManager.getHistory(requireContext())
+                    )
+                    updateNoHistoryView()
                 }
                 recentlyDeletedItem = null
             }
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION && recentlyDeletedItem != null) {
-                        saveUpdatedList()
+                        HistoryManager.saveAll(requireContext(), (0 until adapter.itemCount).map { adapter.getItemAt(it) })
                         recentlyDeletedItem = null
                     }
                 }
             })
 
-        // 🧱 Push it above the BottomNavigationView
-        val bottomNav = requireActivity().findViewById<View>(R.id.bottomNav)
-        snackbar.anchorView = bottomNav
-
+        snackbar.anchorView = requireActivity().findViewById(R.id.bottomNav)
         snackbar.show()
-    }
-
-
-    private fun saveUpdatedList() {
-        val updated = adapter.let { (0 until it.itemCount).map { pos -> it.getItemAt(pos) } }
-        HistoryManager.saveAll(requireContext(), updated)
     }
 
     override fun onDestroyView() {

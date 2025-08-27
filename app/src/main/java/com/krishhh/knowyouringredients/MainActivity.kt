@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity(),
     private lateinit var binding: ActivityMainBinding
     private lateinit var toggle: ActionBarDrawerToggle
     lateinit var viewModel: MainViewModel
-
     private var currentSelectedItemId: Int = R.id.nav_camera
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,13 +32,12 @@ class MainActivity : AppCompatActivity(),
         instance = this
 
         viewModel = androidx.lifecycle.ViewModelProvider(this)[MainViewModel::class.java]
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = "Know Your Ingredients"
 
-        // Drawer and BottomNav setup...
+        // Drawer setup
         toggle = ActionBarDrawerToggle(
             this, binding.drawerLayout, binding.toolbar,
             R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -49,21 +47,23 @@ class MainActivity : AppCompatActivity(),
         binding.navView.setNavigationItemSelectedListener(this)
         binding.bottomNav.setOnNavigationItemSelectedListener(this)
 
-        // Load Firestore profile to update sidebar immediately on app start
-        viewModel.loadUserProfile { name, photo ->
-            // Update local state
-            viewModel.localUserName.value = name
-            // photoUrl is already in ViewModel
-            loadProfile() // Load sidebar header
+        // Ensure user is logged in
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
         }
 
-        // Observe profile changes for sidebar updates
-        lifecycleScope.launch {
-            viewModel.localPhotoUri.collect { loadProfile() }
+        // Load Firestore profile
+        viewModel.loadUserProfile { name, photo ->
+            viewModel.localUserName.value = name
+            viewModel.photoUrl = photo
+            loadProfile()
         }
-        lifecycleScope.launch {
-            viewModel.localUserName.collect { loadProfile() }
-        }
+
+        // Observe LiveData
+        lifecycleScope.launch { viewModel.localPhotoUri.collect { loadProfile() } }
+        lifecycleScope.launch { viewModel.localUserName.collect { loadProfile() } }
 
         // Load first fragment
         if (savedInstanceState == null) {
@@ -75,21 +75,17 @@ class MainActivity : AppCompatActivity(),
             currentSelectedItemId = savedInstanceState.getInt("current_tab", R.id.nav_camera)
             binding.bottomNav.selectedItemId = currentSelectedItemId
         }
-
-        // Get last saved profile info
-        val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        viewModel.localUserName.value = prefs.getString("userName", "Hello!")
-        viewModel.photoUrl = prefs.getString("photoUrl", null)
-        loadProfile()
     }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-
             // Drawer actions
             R.id.nav_edit_profile -> startActivity(Intent(this, EditProfileActivity::class.java))
             R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.nav_tips -> startActivity(Intent(this, NutritionTipsActivity::class.java))
+            R.id.nav_help -> startActivity(Intent(this, HelpActivity::class.java))
+            R.id.nav_feedback -> startActivity(Intent(this, FeedbackActivity::class.java))
+            R.id.nav_about -> startActivity(Intent(this, AboutActivity::class.java))
             R.id.nav_logout -> showLogoutConfirmation()
 
             // BottomNav actions
@@ -117,27 +113,23 @@ class MainActivity : AppCompatActivity(),
         val tv = header.findViewById<android.widget.TextView>(R.id.tvUsername)
 
         tv.text = viewModel.localUserName.value ?: "Hello!"
-
-        val photoToLoad = viewModel.localPhotoUri.value ?: viewModel.photoUrl
         Glide.with(header.context)
-            .load(photoToLoad)
+            .load(viewModel.localPhotoUri.value ?: viewModel.photoUrl)
             .placeholder(R.mipmap.ic_launcher_round)
             .into(iv)
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadProfile()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("current_tab", currentSelectedItemId)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        currentSelectedItemId = savedInstanceState.getInt("current_tab", R.id.nav_camera)
+    private fun showLogoutConfirmation() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("Yes") { _, _ ->
+                FirebaseAuth.getInstance().signOut()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finishAffinity()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onBackPressed() {
@@ -148,23 +140,8 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun showLogoutConfirmation() {
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Logout")
-            .setMessage("Are you sure you want to log out?")
-            .setPositiveButton("Yes") { _, _ ->
-                FirebaseAuth.getInstance().signOut()
-                getSharedPreferences("user_prefs", MODE_PRIVATE)
-                    .edit().putBoolean("remember", false).apply()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finishAffinity()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (instance == this) instance = null
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("current_tab", currentSelectedItemId)
     }
 }

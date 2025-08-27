@@ -9,16 +9,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class HistoryAdapter(
-    private val items: MutableList<HistoryEntry>,
+    items: List<HistoryEntry>,
     private val onItemClick: (HistoryEntry) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+
+    private val items = items.toMutableList()
 
     inner class HistoryViewHolder(val binding: ItemHistoryBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemHistoryBinding.inflate(inflater, parent, false)
+        val binding = ItemHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return HistoryViewHolder(binding)
     }
 
@@ -37,6 +38,12 @@ class HistoryAdapter(
     }
 
     fun getItemAt(position: Int): HistoryEntry = items[position]
+
+    fun setItems(newItems: List<HistoryEntry>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
 
     private fun formatTimestamp(time: Long): String {
         val sdf = SimpleDateFormat("dd MMM yyyy • hh:mm a", Locale.getDefault())

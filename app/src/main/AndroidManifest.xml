@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
+        android:maxSdkVersion="32" />
 
     <application
         android:name=".KYIApp"
@@ -18,44 +18,52 @@
         android:roundIcon="@drawable/logo1"
         android:supportsRtl="true"
         android:theme="@style/Theme.KnowYourIngredients">
-
-        <!-- Screens -->
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FeedbackActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HelpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NutritionTipsActivity"
+            android:exported="false" /> <!-- Screens -->
         <activity
             android:name=".IngredientDetailActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".TextSelectionActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".SettingsActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".EditProfileActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".SignupActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false"/>
-
-        <!-- Splash/launcher -->
+            android:exported="false" /> <!-- Splash/launcher -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.KYI.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
     </application>
+
 </manifest>

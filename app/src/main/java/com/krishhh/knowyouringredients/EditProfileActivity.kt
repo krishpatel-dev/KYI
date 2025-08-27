@@ -1,6 +1,5 @@
 package com.krishhh.knowyouringredients
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -12,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.*
-import androidx.core.content.edit
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -43,12 +42,15 @@ class EditProfileActivity : AppCompatActivity() {
         binding = ActivityEditProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Toolbar
         setSupportActionBar(binding.toolbarEdit)
         supportActionBar?.title = "Edit Profile"
         binding.toolbarEdit.setNavigationOnClickListener { finish() }
 
-        // Setup dropdowns
+        binding.etEmail.apply {
+            isEnabled = false
+            alpha = 0.6f
+        }
+
         (binding.actvDietType as AutoCompleteTextView).setAdapter(
             ArrayAdapter(this, android.R.layout.simple_list_item_1, dietOptions)
         )
@@ -62,16 +64,11 @@ class EditProfileActivity : AppCompatActivity() {
         observeProfile()
         viewModel.loadProfileData()
 
-        // Image picker
         val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK) {
+            if (it.resultCode == RESULT_OK) {
                 it.data?.data?.let { uri ->
                     imageUri = uri
-
-                    // Load into EditProfileActivity ImageView
                     Glide.with(this).load(uri).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
-
-                    // Update MainActivity immediately via shared ViewModel
                     MainActivity.instance?.viewModel?.localPhotoUri?.value = uri
                 }
             }
@@ -82,27 +79,17 @@ class EditProfileActivity : AppCompatActivity() {
             picker.launch(intent)
         }
 
-        // binding.btnSave.setOnClickListener { saveProfile() }
-
-        // When user selects a new photo or updates the name
         binding.btnSave.setOnClickListener {
             val newName = binding.etName.text.toString().trim()
-            val newPhotoUri = imageUri
-            // Update sidebar immediately
             MainActivity.instance?.viewModel?.localUserName?.value = newName
-            if (newPhotoUri != null) {
-                MainActivity.instance?.viewModel?.localPhotoUri?.value = newPhotoUri
-            }
+            imageUri?.let { MainActivity.instance?.viewModel?.localPhotoUri?.value = it }
             saveProfile()
         }
-
     }
 
     private fun observeProfile() {
         lifecycleScope.launch { viewModel.name.collectLatest { it?.let { binding.etName.setText(it) } } }
-        lifecycleScope.launch { viewModel.photoUrl.collectLatest { url ->
-            Glide.with(this@EditProfileActivity).load(url).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
-        } }
+        lifecycleScope.launch { viewModel.photoUrl.collectLatest { url -> Glide.with(this@EditProfileActivity).load(url).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto) } }
         lifecycleScope.launch { viewModel.email.collectLatest { it?.let { binding.etEmail.setText(it) } } }
         lifecycleScope.launch { viewModel.age.collectLatest { it?.let { binding.etAge.setText(it.toString()) } } }
         lifecycleScope.launch { viewModel.gender.collectLatest { it?.let { binding.actvGender.setText(it, false) } } }
@@ -119,7 +106,6 @@ class EditProfileActivity : AppCompatActivity() {
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         if (name.isEmpty()) { Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show(); return }
-        if (email.isEmpty()) { Toast.makeText(this, "Email cannot be empty", Toast.LENGTH_SHORT).show(); return }
 
         val age = binding.etAge.text.toString().trim().toIntOrNull()
         val weight = binding.etWeight.text.toString().trim().toFloatOrNull()
@@ -131,14 +117,10 @@ class EditProfileActivity : AppCompatActivity() {
         val preferences = binding.etPreferences.text.toString().trim().takeIf { it.isNotBlank() }
         val goals = binding.actvGoals.text.toString().takeIf { it.isNotBlank() }
 
-        val currentPhoto = viewModel.photoUrl.value
-
         if (imageUri != null) {
             uploadImageThenSave(name, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
         } else {
-//            updateFirestore(name, currentPhoto, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
-            val currentPhotoUrl = viewModel.photoUrl.value
-            updateFirestore(name, currentPhotoUrl, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
+            updateFirestore(name, viewModel.photoUrl.value, email, age, gender, weight, height, diet, allergies, health, preferences, goals)
         }
     }
 
@@ -167,8 +149,6 @@ class EditProfileActivity : AppCompatActivity() {
             "email" to email,
             "photoUrl" to (photoUrl ?: "")
         )
-
-        // Optional fields
         data["age"] = age ?: FieldValue.delete()
         data["gender"] = gender?.takeIf { it.isNotBlank() } ?: FieldValue.delete()
         data["weight"] = weight ?: FieldValue.delete()
@@ -183,14 +163,10 @@ class EditProfileActivity : AppCompatActivity() {
             .set(data, SetOptions.merge())
             .addOnSuccessListener {
                 Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-
-                // 🔹 Save to SharedPreferences for persistence
                 getSharedPreferences("user_prefs", MODE_PRIVATE).edit {
-                    putString("photoUrl", photoUrl)  // only if a new photo uploaded
-                        .putString("userName", name)
+                    putString("userName", name)
+                    putString("photoUrl", photoUrl)
                 }
-
-                // Refresh MainActivity sidebar immediately
                 MainActivity.instance?.loadProfile()
                 finish()
             }
