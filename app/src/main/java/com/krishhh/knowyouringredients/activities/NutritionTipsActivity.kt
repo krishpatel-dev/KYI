@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

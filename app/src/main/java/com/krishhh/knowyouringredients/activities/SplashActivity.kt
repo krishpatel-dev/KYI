@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import com.krishhh.knowyouringredients.R
 import com.krishhh.knowyouringredients.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {

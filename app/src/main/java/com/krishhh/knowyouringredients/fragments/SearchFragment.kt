@@ -1,5 +1,6 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.fragments
 
+import android.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.krishhh.knowyouringredients.activities.IngredientDetailActivity
 import com.krishhh.knowyouringredients.databinding.FragmentSearchBinding
 import com.krishhh.knowyouringredients.db.IngredientDatabase
 import com.krishhh.knowyouringredients.utils.HistoryManager
@@ -31,7 +33,7 @@ class SearchFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1)
+        adapter = ArrayAdapter(requireContext(), R.layout.simple_list_item_1)
         binding.listSuggestions.adapter = adapter
 
         // Live search

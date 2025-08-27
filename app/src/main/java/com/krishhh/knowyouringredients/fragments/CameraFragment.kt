@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,11 +7,15 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.krishhh.knowyouringredients.R
+import com.krishhh.knowyouringredients.TextSelectionActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -24,7 +28,7 @@ class CameraFragment : Fragment() {
     private val camPerm = Manifest.permission.CAMERA
 
     private val permLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission()
     ) { if (it) startCamera() else requireActivity().finish() }
 
     override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
@@ -62,7 +66,7 @@ class CameraFragment : Fragment() {
                 override fun onCaptureSuccess(proxy: ImageProxy) {
                     val bmp = proxy.toRotatedBitmap(); proxy.close()
                     val path = bmp.save(requireContext().cacheDir)
-                    startActivity(TextSelectionActivity.intent(requireContext(), path))
+                    startActivity(TextSelectionActivity.Companion.intent(requireContext(), path))
                 }
                 override fun onError(e: ImageCaptureException) = toast("Error: ${e.message}")
             })
@@ -83,7 +87,7 @@ class CameraFragment : Fragment() {
     }
 
     private fun toast(m: String) {
-        android.widget.Toast.makeText(requireContext(), m, android.widget.Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show()
     }
 }
 

@@ -1,5 +1,6 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
+import android.R
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -20,6 +21,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.krishhh.knowyouringredients.EditProfileViewModel
 import com.krishhh.knowyouringredients.databinding.ActivityEditProfileBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -52,13 +54,13 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         (binding.actvDietType as AutoCompleteTextView).setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, dietOptions)
+            ArrayAdapter(this, R.layout.simple_list_item_1, dietOptions)
         )
         (binding.actvGender as AutoCompleteTextView).setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, genderOptions)
+            ArrayAdapter(this, R.layout.simple_list_item_1, genderOptions)
         )
         (binding.actvGoals as AutoCompleteTextView).setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, goalsOptions)
+            ArrayAdapter(this, R.layout.simple_list_item_1, goalsOptions)
         )
 
         observeProfile()
@@ -68,7 +70,7 @@ class EditProfileActivity : AppCompatActivity() {
             if (it.resultCode == RESULT_OK) {
                 it.data?.data?.let { uri ->
                     imageUri = uri
-                    Glide.with(this).load(uri).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
+                    Glide.with(this).load(uri).placeholder(com.krishhh.knowyouringredients.R.mipmap.ic_launcher_round).into(binding.ivEditPhoto)
                     MainActivity.instance?.viewModel?.localPhotoUri?.value = uri
                 }
             }
@@ -89,7 +91,8 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun observeProfile() {
         lifecycleScope.launch { viewModel.name.collectLatest { it?.let { binding.etName.setText(it) } } }
-        lifecycleScope.launch { viewModel.photoUrl.collectLatest { url -> Glide.with(this@EditProfileActivity).load(url).placeholder(R.mipmap.ic_launcher_round).into(binding.ivEditPhoto) } }
+        lifecycleScope.launch { viewModel.photoUrl.collectLatest { url -> Glide.with(this@EditProfileActivity).load(url).placeholder(
+            com.krishhh.knowyouringredients.R.mipmap.ic_launcher_round).into(binding.ivEditPhoto) } }
         lifecycleScope.launch { viewModel.email.collectLatest { it?.let { binding.etEmail.setText(it) } } }
         lifecycleScope.launch { viewModel.age.collectLatest { it?.let { binding.etAge.setText(it.toString()) } } }
         lifecycleScope.launch { viewModel.gender.collectLatest { it?.let { binding.actvGender.setText(it, false) } } }

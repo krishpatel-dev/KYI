@@ -19,43 +19,43 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KnowYourIngredients">
         <activity
-            android:name=".AboutActivity"
+            android:name=".activities.AboutActivity"
             android:exported="false" />
         <activity
-            android:name=".FeedbackActivity"
+            android:name=".activities.FeedbackActivity"
             android:exported="false" />
         <activity
-            android:name=".HelpActivity"
+            android:name=".activities.HelpActivity"
             android:exported="false" />
         <activity
-            android:name=".NutritionTipsActivity"
+            android:name=".activities.NutritionTipsActivity"
             android:exported="false" /> <!-- Screens -->
         <activity
-            android:name=".IngredientDetailActivity"
+            android:name=".activities.IngredientDetailActivity"
             android:exported="false" />
         <activity
             android:name=".TextSelectionActivity"
             android:exported="false" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".EditProfileActivity"
+            android:name=".activities.EditProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".ForgotPasswordActivity"
+            android:name=".activities.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".SignupActivity"
+            android:name=".activities.SignupActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="false" /> <!-- Splash/launcher -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.KYI.Splash">
             <intent-filter>

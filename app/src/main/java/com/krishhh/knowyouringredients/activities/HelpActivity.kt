@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.appbar.MaterialToolbar
+import com.krishhh.knowyouringredients.R
 
 class HelpActivity : AppCompatActivity() {
 

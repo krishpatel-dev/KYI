@@ -1,7 +1,10 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Switch
 import android.widget.Spinner
@@ -11,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.material.button.MaterialButton
+import com.krishhh.knowyouringredients.R
 import com.krishhh.knowyouringredients.databinding.ActivitySettingsBinding
 import com.krishhh.knowyouringredients.utils.HistoryManager
 
@@ -73,17 +76,17 @@ class SettingsActivity : AppCompatActivity() {
         val spinner: Spinner = binding.spinnerLanguage
         spinner.adapter = adapter
         spinner.setSelection(languages.indexOf(prefs.getString("language", "English")))
-        spinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: android.widget.AdapterView<*>,
-                view: android.view.View?,
+                parent: AdapterView<*>,
+                view: View?,
                 position: Int,
                 id: Long
             ) {
                 prefs.edit().putString("language", languages[position]).apply()
             }
 
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>) {
+            override fun onNothingSelected(parent: AdapterView<*>) {
                 // Optional: do nothing
             }
         }
@@ -136,7 +139,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun setThemePref(prefs: android.content.SharedPreferences, key: String, mode: Int) {
+    private fun setThemePref(prefs: SharedPreferences, key: String, mode: Int) {
         prefs.edit().putString("theme", key).apply()
         AppCompatDelegate.setDefaultNightMode(mode)
     }

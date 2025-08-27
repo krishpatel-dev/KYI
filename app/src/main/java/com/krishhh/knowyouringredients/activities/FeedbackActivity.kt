@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.krishhh.knowyouringredients.R
 
 class FeedbackActivity : AppCompatActivity() {
 

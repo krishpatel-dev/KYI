@@ -1,5 +1,6 @@
 package com.krishhh.knowyouringredients
 
+import android.R
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
@@ -17,6 +18,8 @@ import com.google.android.material.color.MaterialColors
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.krishhh.knowyouringredients.activities.IngredientDetailActivity
+import com.krishhh.knowyouringredients.adapter.SuggestionAdapter
 import com.krishhh.knowyouringredients.databinding.ActivityTextSelectionBinding
 import com.krishhh.knowyouringredients.db.IngredientDatabase
 import com.krishhh.knowyouringredients.utils.HistoryManager
@@ -94,7 +97,7 @@ class TextSelectionActivity : AppCompatActivity() {
             if (selected != "No such product") {
                 HistoryManager.saveHistory(this, selected)
                 startActivity(IngredientDetailActivity.intent(this, selected))
-                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
         }
         binding.rvSuggestions.layoutManager = LinearLayoutManager(this)

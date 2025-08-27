@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.krishhh.knowyouringredients.R
 import com.krishhh.knowyouringredients.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {

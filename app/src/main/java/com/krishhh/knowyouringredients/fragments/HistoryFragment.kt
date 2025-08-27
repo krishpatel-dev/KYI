@@ -1,4 +1,4 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.fragments
 
 import android.graphics.*
 import android.os.Bundle
@@ -7,6 +7,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
+import com.krishhh.knowyouringredients.R
+import com.krishhh.knowyouringredients.activities.IngredientDetailActivity
 import com.krishhh.knowyouringredients.adapter.HistoryAdapter
 import com.krishhh.knowyouringredients.databinding.FragmentHistoryBinding
 import com.krishhh.knowyouringredients.model.HistoryEntry

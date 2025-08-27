@@ -1,12 +1,14 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.R
 import com.google.android.material.chip.Chip
 import com.google.android.material.color.MaterialColors
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +16,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.krishhh.knowyouringredients.databinding.ActivityIngredientDetailBinding
 import com.krishhh.knowyouringredients.db.IngredientDatabase
+import com.krishhh.knowyouringredients.db.IngredientEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,7 +54,7 @@ class IngredientDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun showData(e: com.krishhh.knowyouringredients.db.IngredientEntity) = with(binding) {
+    private fun showData(e: IngredientEntity) = with(binding) {
         tvFoodProduct.text = e.foodProduct
         tvMainIngredient.text = e.mainIngredient ?: "—"
         tvSweetener.text = e.sweetener ?: "—"
@@ -63,15 +66,15 @@ class IngredientDetailActivity : AppCompatActivity() {
         chipGroupAllergens.removeAllViews()
         val allergens = e.allergens?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
         if (allergens.isNotEmpty()) {
-            val bg = MaterialColors.getColor(this@IngredientDetailActivity, com.google.android.material.R.attr.colorErrorContainer, 0)
-            val fg = MaterialColors.getColor(this@IngredientDetailActivity, com.google.android.material.R.attr.colorOnErrorContainer, 0)
+            val bg = MaterialColors.getColor(this@IngredientDetailActivity, R.attr.colorErrorContainer, 0)
+            val fg = MaterialColors.getColor(this@IngredientDetailActivity, R.attr.colorOnErrorContainer, 0)
 
             for (allergen in allergens) {
                 val chip = Chip(this@IngredientDetailActivity).apply {
                     text = allergen
                     isClickable = false
                     isCheckable = false
-                    chipBackgroundColor = android.content.res.ColorStateList.valueOf(bg)
+                    chipBackgroundColor = ColorStateList.valueOf(bg)
                     setTextColor(fg)
                 }
                 chipGroupAllergens.addView(chip)
@@ -81,7 +84,7 @@ class IngredientDetailActivity : AppCompatActivity() {
         tvNoData.visibility = View.GONE
     }
 
-    private fun checkUserAllergies(e: com.krishhh.knowyouringredients.db.IngredientEntity) {
+    private fun checkUserAllergies(e: IngredientEntity) {
         if (hasShownAllergyWarning) return  // 🔑 Prevent showing multiple times
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return

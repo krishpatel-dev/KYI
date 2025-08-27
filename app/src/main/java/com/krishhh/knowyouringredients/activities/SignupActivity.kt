@@ -1,6 +1,5 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.activities
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -10,10 +9,13 @@ import androidx.core.widget.addTextChangedListener
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.krishhh.knowyouringredients.R
 import com.krishhh.knowyouringredients.databinding.ActivitySignupBinding
 
 class SignupActivity : AppCompatActivity() {
@@ -90,14 +92,14 @@ class SignupActivity : AppCompatActivity() {
         val data = hashMapOf(
             "email" to (email ?: ""),
             "name" to (name ?: ""),
-            "createdAt" to com.google.firebase.Timestamp.now()
+            "createdAt" to Timestamp.now()
         )
         db.collection("users").document(uid).set(data, SetOptions.merge())
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_ONE_TAP && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQ_ONE_TAP && resultCode == RESULT_OK) {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val idToken = credential.googleIdToken
             if (idToken != null) {
@@ -122,7 +124,7 @@ class SignupActivity : AppCompatActivity() {
             binding.etSignupConfirmPassword to binding.etSignupConfirmPasswordLayout
         )
         toggleFields.forEach { (editText, layout) ->
-            layout.endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
+            layout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
             layout.isEndIconVisible = false
             editText.addTextChangedListener { layout.isEndIconVisible = !it.isNullOrEmpty() }
         }

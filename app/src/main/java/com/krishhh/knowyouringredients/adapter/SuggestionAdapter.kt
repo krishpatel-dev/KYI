@@ -1,5 +1,6 @@
-package com.krishhh.knowyouringredients
+package com.krishhh.knowyouringredients.adapter
 
+import android.R
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,7 @@ class SuggestionAdapter(
     }
 
     inner class SuggestionViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        val tvSuggestion: TextView = v.findViewById(android.R.id.text1)
+        val tvSuggestion: TextView = v.findViewById(R.id.text1)
         init {
             v.setOnClickListener {
                 val item = items[adapterPosition]
@@ -32,7 +33,7 @@ class SuggestionAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuggestionViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
+            .inflate(R.layout.simple_list_item_1, parent, false)
         return SuggestionViewHolder(view)
     }
 
