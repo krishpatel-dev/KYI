@@ -1,0 +1,159 @@
+\chapter{System Design}
+
+\section{System Architecture}
+The Know Your Ingredients app follows a client-server architecture with a combination of cloud-based and local storage solutions. The system consists of the following major components:
+\begin{enumerate}
+    \item \textbf{Frontend (Android Client – Kotlin)}
+    \begin{itemize}
+        \item Handles user interactions such as image capture, ingredient search, and result display.
+        \item Integrates Google ML Kit OCR for text extraction.
+        \item Displays ingredient information retrieved from the database.
+    \end{itemize}
+    \item \textbf{Backend Services}
+    \begin{itemize}
+        \item Firebase Firestore (Cloud-based database for ingredient details, updated in real-time).
+        \item CSV file (Local database) for offline access to ingredient data.
+    \end{itemize}
+    \item \textbf{OCR \& Data Processing}
+    \begin{itemize}
+        \item Uses Google ML Kit OCR for text extraction from images.
+        \item Preprocessing module cleans and standardizes ingredient names.
+        \item Search algorithm matches extracted text with the ingredient database.
+    \end{itemize}
+    \item \textbf{Data Storage \& Management}
+    \begin{itemize}
+        \item Ingredient data is stored and updated in Firebase Firestore.
+        \item Users can access previously searched ingredients using CSV database (offline mode).
+    \end{itemize}
+\end{enumerate}
+
+\section{High-Level System Design}
+The high-level architecture can be visualized as follows:
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.4\textwidth]{architecture_diagram.png}
+    \caption{Architecture Diagram}
+    \label{fig:architecture-diagram}
+\end{figure}
+
+\section{Module Breakdown}
+The system is divided into five core modules, each responsible for different functionalities:
+\subsection{Image Scanning \& OCR Module}
+\begin{itemize}
+    \item Captures images from the camera or gallery.
+    \item Uses Google ML Kit OCR to extract ingredient text.
+    \item Sends extracted text to the preprocessing module.
+\end{itemize}
+
+\subsection{Text Preprocessing \& Matching Module}
+\begin{itemize}
+    \item Cleans and standardizes extracted text (removes extra spaces, converts to lowercase).
+    \item Matches ingredient names against the database using a search algorithm.
+\end{itemize}
+
+\subsection{Database Management Module}
+\begin{itemize}
+    \item Stores and retrieves ingredient data from Firebase (online) and SQLite (offline).
+    \item Regularly syncs with Firebase to update the latest ingredient safety information.
+\end{itemize}
+
+\subsection{UI/UX Module}
+\begin{itemize}
+    \item Provides an intuitive interface for scanning, viewing results, and searching ingredients.
+    \item Displays ingredient safety categories (Safe, Cautionary, Harmful).
+    \item Includes dark mode support for accessibility.
+\end{itemize}
+
+\section{Technology Stack}
+The technologies used in the system are summarized in the table below:
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Component} & \textbf{Technology Used} \\ \hline
+        Frontend (UI/UX) & Kotlin, Jetpack Compose / XML \\ \hline
+        OCR Engine & Google ML Kit OCR \\ \hline
+        Database (Online) & Firebase Firestore \\ \hline
+        Database (Offline) & CSV file \\ \hline
+        Cloud Storage & Firebase Storage (for images) \\ \hline
+        Barcode Scanning (Future) & Google Barcode API \\ \hline
+        Backend Integration & REST API (for future external sources) \\ \hline
+    \end{tabular}
+    \caption{Technology Stack for Know Your Ingredients App}
+    \label{tab:tech_stack}
+\end{table}
+
+\section{Data Flow Diagram (DFD - Level 1)}
+The data flow process is as follows:
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{data_flow_diagram.png}
+    \caption{Data Flow Diagram}
+    \label{fig:data-flow-diagram}
+\end{figure}
+
+\section{Database Design}
+\subsection{Conceptual Database Design}
+The database is structured as a relational model (for CSV file) and a document-based NoSQL model (for Firebase Firestore).
+
+\subsubsection{Key Entities \& Relationships}
+\begin{itemize}
+    \item \textbf{Ingredients Entity}: Stores the master ingredient list with attributes such as name, benefits, risks, safety classification, and alternatives.
+    \item \textbf{Products Entity}: Stores scanned product details and links them to ingredient lists.
+    \item \textbf{Product-Ingredients Relationship}: Maps products to their ingredients (many-to-many relationship).
+    \item \textbf{User Settings Entity (Optional)}: Stores user preferences (e.g., dietary restrictions, offline mode).
+\end{itemize}
+
+\subsection{Safety Classification System}
+Ingredients are categorized into three levels based on research:
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Safety Category} & \textbf{Description} \\ \hline
+        Safe & No known harmful effects. \\ \hline
+        Cautionary & Limited research or minor potential risks. \\ \hline
+        Harmful & Linked to toxicity, allergies, or health risks. \\ \hline
+    \end{tabular}
+    \caption{Safety Classifications for Ingredients}
+    \label{tab:safety_classifications}
+\end{table}
+
+\section{Security Considerations}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{3cm}|p{8cm}|}
+        \hline
+        \textbf{Feature} & \textbf{Description} \\ \hline
+        User Privacy & No personal data is collected; only scanned ingredient text is processed. \\ \hline
+        Data Protection & Firebase uses encrypted connections (SSL/TLS) for secure data transfer. \\ \hline
+        Permissions Management & The app will request camera and storage permissions only when necessary. \\ \hline
+    \end{tabular}
+    \caption{Security and Privacy Features}
+    \label{tab:security_privacy}
+\end{table}
+
+\section{User Interface Design}
+\subsection{Main Screens}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Screen} & \textbf{Description} \\ \hline
+        Home Screen & Camera \& gallery upload options. \\ \hline
+        Scanning Screen & OCR processing in progress. \\ \hline
+        Results Screen & Ingredient list with safety classifications. \\ \hline
+        Ingredient Details Screen & In-depth analysis of individual ingredients. \\ \hline
+        Settings Screen & Language preferences, offline mode toggle. \\ \hline
+    \end{tabular}
+    \caption{Screens of the Know Your Ingredients App}
+    \label{tab:app_screens}
+\end{table}
+
+\begin{figure}[h!] 
+    \centering
+    \vspace{1cm}
+    \includegraphics[width=\textwidth]{Highlevelsystemarch.png}
+    \caption{High-Level System Architecture}
+    \label{fig:high-level-architecture}
+\end{figure}

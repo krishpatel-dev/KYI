@@ -78,7 +78,7 @@
                             style="@style/TextAppearance.Material3.BodyMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Main Ingredient"
+                            android:text="Main Ingredients"
                             android:textStyle="bold"/>
 
                         <TextView
@@ -296,7 +296,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:text="Prediction"
+                            android:text="Description"
                             android:textStyle="bold" />
                     </LinearLayout>
 

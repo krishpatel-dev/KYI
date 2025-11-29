@@ -1,0 +1,116 @@
+\chapter{System Analysis}
+
+\section{Literature Survey}
+\subsection{Overview of Ingredient Analysis Applications}
+Over the years, several mobile applications have been developed to help users analyze product ingredients. Some of the most popular ones include:
+\begin{itemize}
+    \item \textbf{Yuka} – Focuses on both food and cosmetics but lacks a comprehensive database.
+    \item \textbf{Think Dirty} – Specializes in beauty and cosmetic product analysis but does not include food items.
+    \item \textbf{Fooducate} – Focuses on analyzing food products and providing health scores but lacks beauty product analysis.
+\end{itemize}
+While these applications are useful, they have certain limitations, such as:
+\begin{enumerate}
+    \item Limited ingredient databases
+    \item Poor text recognition
+    \item Lack of combined analysis for food and beauty products
+\end{enumerate}
+Our project aims to address these gaps by providing a more comprehensive and accurate solution.
+
+\subsection{OCR and Machine Learning in Mobile Applications}
+OCR (Optical Character Recognition) is a critical technology that allows the application to scan and recognize text from images. Common OCR tools include:
+\begin{itemize}
+    \item \textbf{Google ML Kit OCR} – A cloud-based and on-device OCR tool with high accuracy.
+    \item \textbf{Tesseract OCR} – An open-source OCR engine commonly used in mobile applications.
+\end{itemize}
+By combining OCR with Machine Learning, we can enhance text recognition and improve ingredient classification accuracy.
+
+\subsection{Health Implications of Harmful Ingredients}
+Several food additives and cosmetic chemicals are known to have health risks:
+\begin{itemize}
+    \item \textbf{Parabens} – Found in cosmetics; linked to hormonal imbalances.
+    \item \textbf{Artificial Sweeteners} – Found in diet foods; associated with metabolic disorders.
+    \item \textbf{Synthetic Fragrances} – Found in beauty products; can cause allergic reactions.
+\end{itemize}
+Providing accurate and scientific information on such ingredients is essential for public awareness.
+
+% Including the flowchart image
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{flowchart_process.png}
+    \caption{Working process of the application}
+    \label{fig:literature-survey-flowchart}
+\end{figure}
+
+\section{Software Requirements Specification (SRS)}
+\subsection{Overall Description}
+\subsubsection{Product Perspective}
+The application serves as a standalone consumer tool for ingredient analysis, utilizing OCR technology to extract ingredient names from product labels and cross-referencing them with a structured database. It integrates with Google ML Kit for OCR and Firebase/SQLite for ingredient data storage and retrieval.
+
+\subsubsection{Product Features}
+\begin{enumerate}
+    \item \textbf{OCR-Based Ingredient Scanning} – Extracts text from images of ingredient lists.
+    \item \textbf{Ingredient Database} – Provides descriptions, benefits, risks, and safety classifications.
+    \item \textbf{Categorization System} – Labels ingredients as Safe, Cautionary, or Harmful.
+    \item \textbf{Offline Functionality} – Uses CSV database for local ingredient storage.
+    \item \textbf{User-Friendly UI} – Displays ingredient details and product safety summaries.
+\end{enumerate}
+
+\subsubsection{User Classes and Characteristics}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{User Category} & \textbf{Description} \\ \hline
+        General Consumers & Individuals seeking ingredient safety insights. \\ \hline
+        Health-Conscious Users & Users with allergies, dietary restrictions, or sensitivities. \\ \hline
+        Researchers \& Professionals & Users analyzing product formulations. \\ \hline
+    \end{tabular}
+    \caption{Target User Groups for Know Your Ingredients App}
+    \label{tab:user_groups}
+\end{table}
+
+\subsubsection{Operating Environment}
+\begin{itemize}
+    \item Android devices running Android 7.0 (Nougat) and above.
+    \item Requires internet connectivity for Firebase database access.
+    \item Functions offline using CSV database for ingredient lookup.
+\end{itemize}
+
+\subsection{Functional Requirements}
+\subsubsection{Image Scanning \& OCR}
+\begin{itemize}
+    \item The app must allow users to capture images from the camera or gallery.
+    \item Extracted text should be processed and formatted for accuracy.
+\end{itemize}
+
+\subsubsection{Ingredient Lookup \& Categorization}
+\begin{itemize}
+    \item The app must search for extracted ingredients in the database.
+    \item Ingredients should be categorized as Safe, Cautionary, or Harmful.
+    \item Users should be able to view ingredient details, including pros and cons.
+\end{itemize}
+
+\subsubsection{Database Management}
+\begin{itemize}
+    \item Firebase should handle cloud-based ingredient storage and updates.
+    \item CSV file should provide offline access for stored ingredient data.
+\end{itemize}
+
+\subsection{Non-Functional Requirements}
+\subsubsection{Performance Requirements}
+\begin{itemize}
+    \item The app should extract text and display results within 5 seconds.
+    \item Offline functionality must support at least 500 stored ingredients.
+\end{itemize}
+
+\subsubsection{Security Requirements}
+\begin{itemize}
+    \item User data should be stored securely using Firebase Authentication.
+    \item Ingredient database updates should be verified before deployment.
+\end{itemize}
+
+\subsubsection{Usability Requirements}
+\begin{itemize}
+    \item The UI should be intuitive, accessible, and visually appealing.
+    \item Multi-language support will be added in future updates.
+\end{itemize}

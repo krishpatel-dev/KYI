@@ -1,0 +1,587 @@
+\chapter{Implementation}
+
+\section{Development Methodology}
+\subsection{Research \& Requirement Gathering}
+The development of the Know Your Ingredients application began with extensive research on ingredient transparency tools, consumer needs, and existing regulatory guidelines from sources such as the FDA, EWG, and WHO. This phase also involved gathering user expectations and identifying potential challenges in OCR-based ingredient detection. The system requirements were clearly defined, including both functional and non-functional aspects, to ensure effective extraction, analysis, and presentation of ingredient information.
+
+\subsection{Dataset Collection \& Database Development}
+A comprehensive ingredient database was built using information from scientific and regulatory sources to provide accurate ingredient analysis. The dataset included structured information such as:
+\begin{itemize}
+    \item Ingredient name
+    \item Common uses
+    \item Benefits
+    \item Potential risks
+    \item Safety classification
+\end{itemize}
+The database was designed to be accessible both online (Firebase Firestore) and offline (CSV file), ensuring users could retrieve ingredient details without an internet connection.
+
+\section{Setting Up the Development Environment}
+The development environment was set up using the following tools and technologies to ensure seamless data flow, offline accessibility, and efficient UI updates.
+
+\subsection{IDE \& Language}
+\begin{itemize}
+    \item Android Studio as the primary IDE.
+    \item Kotlin as the programming language for its efficiency and native support for Android.
+\end{itemize}
+
+\screenshotbox{12cm}{3cm}
+
+\subsection{Dependencies \& Libraries}
+The following dependencies were added to the project's \texttt{build.gradle} file:
+
+\begin{lstlisting}[language=gradle, caption=build.gradle dependencies]
+dependencies {
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    
+    // Firebase
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.7.0'
+    implementation 'com.google.firebase:firebase-auth-ktx:22.1.0'
+    
+    // Google ML Kit OCR
+    implementation 'com.google.mlkit:text-recognition:16.0.0'
+    
+    // Image handling
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    
+    // Lifecycle components
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
+    
+    // Room database
+    implementation 'androidx.room:room-runtime:2.5.0'
+    implementation 'androidx.room:room-ktx:2.5.0'
+    kapt 'androidx.room:room-compiler:2.5.0'
+    
+    // CSV parsing
+    implementation 'com.opencsv:opencsv:5.7.1'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+\end{lstlisting}
+
+\section{Optical Character Recognition (OCR) Implementation}
+To enable text extraction from captured images of ingredient lists, Google ML Kit OCR API was integrated. This ensures high accuracy in ingredient extraction, even in cases where OCR introduces minor errors.
+
+\subsection{OCR Service Implementation}
+The core OCR functionality is implemented in the \texttt{OCRService} class:
+
+\begin{lstlisting}[language=Kotlin, caption=OCRService.kt - Main OCR Implementation]
+class OCRService {
+    private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+    
+    fun extractTextFromImage(bitmap: Bitmap, callback: (String) -> Unit) {
+        val image = InputImage.fromBitmap(bitmap, 0)
+        
+        textRecognizer.process(image)
+            .addOnSuccessListener { result ->
+                val extractedText = result.text
+                val processedText = preprocessText(extractedText)
+                callback(processedText)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("OCR", "Text recognition failed", exception)
+                callback("")
+            }
+    }
+    
+    private fun preprocessText(rawText: String): String {
+        return rawText
+            .replace("\\n", " ")
+            .replace("\\t", " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .lowercase()
+    }
+}
+\end{lstlisting}
+
+\subsection{Image Input Methods}
+The application supports multiple image input methods through the \texttt{ImageCaptureActivity}:
+
+\begin{lstlisting}[language=Kotlin, caption=ImageCaptureActivity.kt - Image Input Handling]
+class ImageCaptureActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityImageCaptureBinding
+    private val ocrService = OCRService()
+    
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        bitmap?.let { processCapturedImage(it) }
+    }
+    
+    private val galleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { processGalleryImage(it) }
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityImageCaptureBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupClickListeners()
+    }
+    
+    private fun setupClickListeners() {
+        binding.btnCamera.setOnClickListener {
+            checkCameraPermissionAndCapture()
+        }
+        
+        binding.btnGallery.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+    }
+    
+    private fun processCapturedImage(bitmap: Bitmap) {
+        binding.imagePreview.setImageBitmap(bitmap)
+        ocrService.extractTextFromImage(bitmap) { extractedText ->
+            handleExtractedText(extractedText)
+        }
+    }
+}
+\end{lstlisting}
+
+\screenshotbox{12cm}{4cm}
+
+\subsection{Text Recognition \& Processing}
+The extracted text undergoes sophisticated processing using the \texttt{TextProcessor} class:
+
+\begin{lstlisting}[language=Kotlin, caption=TextProcessor.kt - Advanced Text Processing]
+class TextProcessor {
+    private val ingredientPatterns = listOf(
+        Regex("ingredients?:?\\s*", RegexOption.IGNORE_CASE),
+        Regex("contains?:?\\s*", RegexOption.IGNORE_CASE)
+    )
+    
+    fun processIngredientText(rawText: String): List<String> {
+        var cleanedText = cleanText(rawText)
+        cleanedText = extractIngredientsSection(cleanedText)
+        return splitIngredients(cleanedText)
+    }
+    
+    private fun cleanText(text: String): String {
+        return text
+            .replace(Regex("[^a-zA-Z0-9\\s,.-]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
+    
+    private fun extractIngredientsSection(text: String): String {
+        for (pattern in ingredientPatterns) {
+            val match = pattern.find(text)
+            if (match != null) {
+                return text.substring(match.range.last + 1).trim()
+            }
+        }
+        return text
+    }
+    
+    private fun splitIngredients(text: String): List<String> {
+        return text.split(",", ";", ".")
+            .map { it.trim() }
+            .filter { it.isNotBlank() && it.length > 2 }
+    }
+    
+    fun correctOCRErrors(ingredient: String): String {
+        val corrections = mapOf(
+            "sodum" to "sodium",
+            "potasium" to "potassium",
+            "calcuim" to "calcium",
+            "vitmin" to "vitamin",
+            "benzoat" to "benzoate"
+        )
+        
+        var corrected = ingredient.lowercase()
+        corrections.forEach { (error, correction) ->
+            corrected = corrected.replace(error, correction)
+        }
+        return corrected
+    }
+}
+\end{lstlisting}
+
+\subsection{Data Preprocessing \& Standardization}
+Advanced preprocessing is implemented using fuzzy string matching:
+
+\begin{lstlisting}[language=Kotlin, caption=FuzzyMatcher.kt - Ingredient Matching]
+class FuzzyMatcher {
+    private val threshold = 0.8
+    
+    fun findBestMatch(input: String, candidates: List<String>): String? {
+        var bestMatch: String? = null
+        var bestScore = 0.0
+        
+        for (candidate in candidates) {
+            val score = calculateSimilarity(input, candidate)
+            if (score > bestScore && score >= threshold) {
+                bestScore = score
+                bestMatch = candidate
+            }
+        }
+        
+        return bestMatch
+    }
+    
+    private fun calculateSimilarity(s1: String, s2: String): Double {
+        val longer = if (s1.length > s2.length) s1 else s2
+        val shorter = if (s1.length > s2.length) s2 else s1
+        
+        if (longer.isEmpty()) return 1.0
+        
+        val editDistance = levenshteinDistance(longer, shorter)
+        return (longer.length - editDistance) / longer.length.toDouble()
+    }
+    
+    private fun levenshteinDistance(s1: String, s2: String): Int {
+        val dp = Array(s1.length + 1) { IntArray(s2.length + 1) }
+        
+        for (i in 0..s1.length) dp[i][0] = i
+        for (j in 0..s2.length) dp[0][j] = j
+        
+        for (i in 1..s1.length) {
+            for (j in 1..s2.length) {
+                val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
+                dp[i][j] = minOf(
+                    dp[i - 1][j] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j - 1] + cost
+                )
+            }
+        }
+        
+        return dp[s1.length][s2.length]
+    }
+}
+\end{lstlisting}
+
+\section{Database Implementation and Data Management}
+The database serves as the backbone of the application, ensuring efficient storage, retrieval, and management of ingredient-related data. It adopts a hybrid approach, integrating both cloud-based and offline storage.
+
+\subsection{Database Models}
+The ingredient data structure is defined using Room entities:
+
+\begin{lstlisting}[language=Kotlin, caption=IngredientEntity.kt - Database Model]
+@Entity(tableName = "ingredients")
+data class IngredientEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val commonNames: String, // Comma-separated alternative names
+    val description: String,
+    val benefits: String,
+    val risks: String,
+    val safetyLevel: String, // "SAFE", "CAUTIONARY", "HARMFUL"
+    val category: String, // "FOOD", "COSMETIC", "BOTH"
+    val regulatoryStatus: String,
+    val alternatives: String, // Comma-separated safer alternatives
+    val lastUpdated: Long
+)
+
+@Entity(tableName = "scanned_products")
+data class ScannedProductEntity(
+    @PrimaryKey val id: String,
+    val productName: String,
+    val scanTimestamp: Long,
+    val extractedText: String,
+    val identifiedIngredients: String // JSON array of ingredient IDs
+)
+\end{lstlisting}
+
+\subsection{Database Access Object (DAO)}
+
+\begin{lstlisting}[language=Kotlin, caption=IngredientDao.kt - Database Access Layer]
+@Dao
+interface IngredientDao {
+    @Query("SELECT * FROM ingredients WHERE name LIKE :query OR commonNames LIKE :query")
+    suspend fun searchIngredients(query: String): List<IngredientEntity>
+    
+    @Query("SELECT * FROM ingredients WHERE id = :id")
+    suspend fun getIngredientById(id: String): IngredientEntity?
+    
+    @Query("SELECT * FROM ingredients WHERE safetyLevel = :level")
+    suspend fun getIngredientsBySafetyLevel(level: String): List<IngredientEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertIngredients(ingredients: List<IngredientEntity>)
+    
+    @Query("DELETE FROM ingredients")
+    suspend fun clearAllIngredients()
+    
+    @Query("SELECT COUNT(*) FROM ingredients")
+    suspend fun getIngredientCount(): Int
+}
+
+@Dao
+interface ScannedProductDao {
+    @Query("SELECT * FROM scanned_products ORDER BY scanTimestamp DESC LIMIT 20")
+    suspend fun getRecentScans(): List<ScannedProductEntity>
+    
+    @Insert
+    suspend fun insertScan(product: ScannedProductEntity)
+    
+    @Query("DELETE FROM scanned_products WHERE scanTimestamp < :cutoffTime")
+    suspend fun deleteOldScans(cutoffTime: Long)
+}
+\end{lstlisting}
+
+\subsection{Database Instance}
+
+\begin{lstlisting}[language=Kotlin, caption=AppDatabase.kt - Room Database Configuration]
+@Database(
+    entities = [IngredientEntity::class, ScannedProductEntity::class],
+    version = 1,
+    exportSchema = false
+)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun ingredientDao(): IngredientDao
+    abstract fun scannedProductDao(): ScannedProductDao
+    
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+        
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "ingredient_database"
+                )
+                .fallbackToDestructiveMigration()
+                .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Repository Pattern Implementation}
+
+\begin{lstlisting}[language=Kotlin, caption=IngredientRepository.kt - Data Management Layer]
+class IngredientRepository(context: Context) {
+    private val localDao = AppDatabase.getDatabase(context).ingredientDao()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val csvHelper = CSVHelper(context)
+    
+    suspend fun searchIngredient(query: String): IngredientEntity? {
+        // First, try local database
+        var results = localDao.searchIngredients("%$query%")
+        
+        if (results.isNotEmpty()) {
+            return findBestMatch(query, results)
+        }
+        
+        // If not found locally, try Firestore
+        return searchInFirestore(query)
+    }
+    
+    private suspend fun searchInFirestore(query: String): IngredientEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val querySnapshot = firestore.collection("ingredients")
+                    .whereArrayContains("searchTerms", query.lowercase())
+                    .limit(10)
+                    .get()
+                    .await()
+                
+                val ingredients = querySnapshot.documents.mapNotNull { doc ->
+                    doc.toIngredientEntity()
+                }
+                
+                if (ingredients.isNotEmpty()) {
+                    // Cache the results locally
+                    localDao.insertIngredients(ingredients)
+                    findBestMatch(query, ingredients)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("Repository", "Firestore search failed", e)
+                null
+            }
+        }
+    }
+    
+    private fun findBestMatch(query: String, candidates: List<IngredientEntity>): IngredientEntity? {
+        val fuzzyMatcher = FuzzyMatcher()
+        val candidateNames = candidates.map { it.name }
+        val bestMatch = fuzzyMatcher.findBestMatch(query, candidateNames)
+        
+        return candidates.find { it.name == bestMatch }
+    }
+    
+    suspend fun syncWithFirestore() {
+        withContext(Dispatchers.IO) {
+            try {
+                val lastSync = getLastSyncTimestamp()
+                val querySnapshot = firestore.collection("ingredients")
+                    .whereGreaterThan("lastUpdated", lastSync)
+                    .get()
+                    .await()
+                
+                val newIngredients = querySnapshot.documents.mapNotNull { doc ->
+                    doc.toIngredientEntity()
+                }
+                
+                if (newIngredients.isNotEmpty()) {
+                    localDao.insertIngredients(newIngredients)
+                    updateLastSyncTimestamp(System.currentTimeMillis())
+                }
+            } catch (e: Exception) {
+                Log.e("Repository", "Sync failed", e)
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\screenshotbox{12cm}{4cm}
+
+\subsection{CSV Data Loading}
+
+\begin{lstlisting}[language=Kotlin, caption=CSVHelper.kt - Offline Data Loading]
+class CSVHelper(private val context: Context) {
+    
+    suspend fun loadIngredientsFromCSV(): List<IngredientEntity> {
+        return withContext(Dispatchers.IO) {
+            val ingredients = mutableListOf<IngredientEntity>()
+            
+            try {
+                context.assets.open("ingredients_database.csv").use { inputStream ->
+                    val reader = CSVReader(InputStreamReader(inputStream))
+                    val headers = reader.readNext() // Skip header row
+                    
+                    var record: Array<String>?
+                    while (reader.readNext().also { record = it } != null) {
+                        record?.let { row ->
+                            if (row.size >= 10) {
+                                val ingredient = IngredientEntity(
+                                    id = row[0],
+                                    name = row[1],
+                                    commonNames = row[2],
+                                    description = row[3],
+                                    benefits = row[4],
+                                    risks = row[5],
+                                    safetyLevel = row[6],
+                                    category = row[7],
+                                    regulatoryStatus = row[8],
+                                    alternatives = row[9],
+                                    lastUpdated = System.currentTimeMillis()
+                                )
+                                ingredients.add(ingredient)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CSVHelper", "Error loading CSV data", e)
+            }
+            
+            ingredients
+        }
+    }
+    
+    suspend fun initializeDatabase(dao: IngredientDao) {
+        if (dao.getIngredientCount() == 0) {
+            val ingredients = loadIngredientsFromCSV()
+            dao.insertIngredients(ingredients)
+            Log.i("CSVHelper", "Loaded ${ingredients.size} ingredients from CSV")
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Ingredient Classification \& Safety Analysis}
+Extracted ingredients are compared with the database and categorized into three safety levels:
+\begin{itemize}
+    \item Safe
+    \item Cautionary  
+    \item Harmful
+\end{itemize}
+Classification is based on scientific research, regulatory warnings, and toxicological studies.
+
+\subsection{String Matching Algorithms}
+Since OCR can introduce errors (e.g., misreading sodium benzoate as sodum benzoate), fuzzy matching techniques (such as Levenshtein Distance) are used to improve accuracy.
+
+\section{UI/UX Development}
+The UI was designed using Jetpack Compose/XML layouts, following Material Design principles. A user-friendly and intuitive interface was designed to ensure seamless navigation.
+
+\subsection{Key UI Features}
+\begin{itemize}
+    \item \textbf{Home Screen}:
+    \begin{itemize}
+        \item Scan button for quick ingredient analysis.
+        \item Manual search for ingredient lookup.
+        \item Scan history section.
+    \end{itemize}
+    \item \textbf{Results Page}:
+    \begin{itemize}
+        \item Displays ingredient classifications with color-coded safety indicators:
+        \item Green – Safe
+        \item Yellow – Cautionary
+        \item Red – Harmful
+    \end{itemize}
+    \item \textbf{Accessibility Features}:
+    \begin{itemize}
+        \item Dark mode support
+        \item Font resizing capabilities
+        \item Multi-language support (future enhancement)
+    \end{itemize}
+\end{itemize}
+
+\section{Performance Optimization and Security Measures}
+To ensure efficient performance and security, several optimizations were applied.
+
+\subsection{Performance Enhancements}
+\begin{itemize}
+    \item Image Compression – Reduces file size for faster OCR processing.
+    \item Database Indexing – Speeds up ingredient lookup.
+    \item Caching Mechanisms – Reduces unnecessary API calls.
+\end{itemize}
+
+\subsection{Security Measures}
+\begin{itemize}
+    \item Encrypted Communication between Firebase and the app.
+    \item Secure User Authentication using Firebase Authentication.
+    \item Strict Permissions Management for accessing camera and storage.
+\end{itemize}
+
+\section{Deployment}
+\subsection{Google Play Store Deployment}
+The app was prepared with:
+\begin{itemize}
+    \item Feature descriptions
+    \item Privacy policies
+    \item User guidelines
+\end{itemize}
+
+\subsection{Post-Launch Monitoring}
+Integrated analytics tools to track:
+\begin{itemize}
+    \item User behavior
+    \item App crashes
+    \item Performance issues
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{workflowdiagram.png}
+    \caption{Workflow Diagram}
+    \label{fig:workflow-diagram}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{deploymentdiagram.png}
+    \caption{Deployment Diagram}
+    \label{fig:deployment-diagram}
+\end{figure}
